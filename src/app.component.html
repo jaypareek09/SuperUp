@@ -1,0 +1,22 @@
+
+@if (authService.currentUser()) {
+  <app-dashboard />
+} @else {
+  <div class="min-h-screen bg-[#F5F5F7] text-[#1d1d1f] antialiased selection:bg-blue-100 selection:text-blue-900">
+    <app-header />
+    
+    <main>
+      <app-hero />
+      <app-how-it-works />
+      <app-features />
+      <app-testimonials />
+      <app-demo />
+    </main>
+    
+    <app-footer />
+
+    @if (modalService.isOpen()) {
+      <app-login-modal />
+    }
+  </div>
+}
