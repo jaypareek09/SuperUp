@@ -27,8 +27,7 @@ import { StoreService } from '../../services/store.service';
                   <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                </div>
                <h3 class="text-xl font-bold text-[#0F172A] mb-2">No leads yet</h3>
-               <p class="text-slate-500 max-w-sm mx-auto mb-6">Interact with people in the Engagement Hub or sync your extension to find prospects.</p>
-               <button (click)="store.currentView.set('EXTENSION')" class="text-blue-600 font-bold text-sm hover:underline">Setup Extension</button>
+               <p class="text-slate-500 max-w-sm mx-auto mb-6">Interact with people in the Engagement Hub to find prospects.</p>
              </div>
          } @else {
              <div class="overflow-x-auto">

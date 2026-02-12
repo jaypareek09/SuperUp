@@ -47,7 +47,7 @@ import { GeminiService } from '../services/gemini.service';
               <button 
                 (click)="generate()" 
                 [disabled]="isLoading()"
-                class="w-full bg-[#0F172A] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#1E293B] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                class="w-full bg-[#0065FF] text-white py-4 rounded-lg font-bold text-sm hover:bg-[#0052CC] transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 @if (isLoading()) {
                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

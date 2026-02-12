@@ -1,5 +1,5 @@
 {
-  "name": "superup---premium-linkedin-tool",
+  "name": "postrocket---premium-linkedin-growth-tool",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,6 +16,7 @@
     "@google/genai": "^1.40.0",
     "@angular/common": "^21.1.0",
     "@angular/forms": "^21.1.3",
+    "@supabase/supabase-js": "^2.95.3",
     "@angular/build": "^21.1.0",
     "@angular/cli": "^21.1.0",
     "@angular/compiler-cli": "^21.1.0",

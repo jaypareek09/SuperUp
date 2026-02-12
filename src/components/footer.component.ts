@@ -5,30 +5,28 @@ import { Component } from '@angular/core';
   selector: 'app-footer',
   standalone: true,
   template: `
-    <footer class="bg-[#0F172A] text-white pt-24 pb-12">
+    <footer id="footer" class="bg-[#0F172A] text-white pt-24 pb-12">
       <div class="max-w-7xl mx-auto px-6">
         
         <!-- Top Section -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-12 border-b border-slate-800 pb-16 mb-16">
            <div>
              <h2 class="text-4xl font-bold tracking-tight mb-6">Start growing today.</h2>
-             <p class="text-slate-400 text-lg max-w-md">Join 10,000+ creators and companies using SuperUp to dominate LinkedIn.</p>
+             <p class="text-slate-400 text-lg max-w-md">Be one of the first to use PostRocket to dominate LinkedIn.</p>
            </div>
            <div class="flex flex-col sm:flex-row gap-4 items-start md:items-center md:justify-end">
               <input type="email" placeholder="Enter your email" class="bg-slate-800 border border-slate-700 text-white rounded-lg px-6 py-4 outline-none focus:border-blue-500 w-full sm:w-80 transition-colors">
               <button class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 px-8 rounded-lg transition-all hover:scale-105 shadow-lg shadow-blue-900/50">
-                Get Started
+                Join Waitlist
               </button>
            </div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-5 gap-8 mb-16">
           <div class="col-span-2 md:col-span-2 pr-8">
-            <div class="flex items-center gap-2 mb-6">
-               <div class="w-6 h-6 bg-white rounded flex items-center justify-center text-[#0F172A]">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-               </div>
-               <span class="text-xl font-bold">SuperUp.</span>
+            <div class="flex items-center gap-3 mb-6 cursor-pointer" (click)="scrollToTop()">
+               <img src="https://raw.githubusercontent.com/jaypareek09/jay/f8f0e8a4249db057b6d86eb42a6139b6abaa8287/POSTROCKET%20-%20LOGO.png" alt="PostRocket" class="h-8 w-auto brightness-0 invert">
+               <span class="font-bold text-xl tracking-tight text-white">PostRocket</span>
             </div>
             <p class="text-slate-500 text-sm leading-relaxed mb-6 max-w-xs">
               The AI operating system for LinkedIn. We help you write, schedule, and analyze your content 10x faster.
@@ -42,8 +40,7 @@ import { Component } from '@angular/core';
           <div>
             <h4 class="font-bold text-white mb-6">Product</h4>
             <ul class="space-y-4 text-sm text-slate-400">
-               <li><a href="#" class="hover:text-white transition-colors">Features</a></li>
-               <li><a href="#" class="hover:text-white transition-colors">Pricing</a></li>
+               <li><a (click)="scrollTo('pricing')" class="cursor-pointer hover:text-white transition-colors">Pricing</a></li>
                <li><a href="#" class="hover:text-white transition-colors">Changelog</a></li>
                <li><a href="#" class="hover:text-white transition-colors">Integrations</a></li>
             </ul>
@@ -69,9 +66,15 @@ import { Component } from '@angular/core';
           </div>
         </div>
 
-        <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-           <p class="text-xs text-slate-500">© 2024 SuperUp Inc. All rights reserved.</p>
-           <div class="flex items-center gap-2 text-xs text-slate-500">
+        <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-start gap-4">
+           <div class="flex flex-col gap-3">
+             <p class="text-xs text-slate-500">Copyright © 2026 PostRocket. All rights reserved.</p>
+             <p class="text-[10px] text-slate-600 max-w-lg leading-relaxed">
+               Disclaimer: PostRocket is not endorsed by or affiliated with the LinkedIn Corporation, registered in the U.S. and other countries. LinkedIn is a trademark of the LinkedIn Corporation.
+             </p>
+           </div>
+           
+           <div class="flex items-center gap-2 text-xs text-slate-500 whitespace-nowrap">
              <span class="w-2 h-2 rounded-full bg-green-500"></span>
              All systems operational
            </div>
@@ -81,4 +84,15 @@ import { Component } from '@angular/core';
     </footer>
   `
 })
-export class FooterComponent {}
+export class FooterComponent {
+  scrollTo(id: string) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}

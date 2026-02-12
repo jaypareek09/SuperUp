@@ -6,7 +6,7 @@ import { StoreService } from '../../services/store.service';
 import { GeminiService } from '../../services/gemini.service';
 import { AuthService } from '../../services/auth.service';
 
-// Declare html2canvas for TypeScript since we loaded it via CDN
+// Declare html2canvas
 declare var html2canvas: any;
 
 @Component({
@@ -16,240 +16,162 @@ declare var html2canvas: any;
   template: `
     <div class="flex flex-col h-[calc(100vh-4rem)] bg-[#F8FAFC]">
        
-       <!-- Toolbar / Top Actions -->
+       <!-- Toolbar -->
        <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shrink-0 h-16 shadow-sm z-20 relative">
           <div class="flex items-center gap-6">
              <h2 class="font-bold text-slate-800 text-lg flex items-center gap-2">
-                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
                 Carousel Maker
              </h2>
              <div class="h-6 w-px bg-slate-200"></div>
              <!-- Templates -->
-             <div class="flex items-center gap-3">
-                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wide">Templates:</span>
-                <button (click)="applyTemplate('minimal')" class="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm">Minimal</button>
-                <button (click)="applyTemplate('bold')" class="px-3 py-1.5 text-xs font-medium rounded-md border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">Bold</button>
-                <button (click)="applyTemplate('dark')" class="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-800 bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-sm">Dark</button>
+             <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wide mr-2">Style:</span>
+                <button (click)="applyTemplate('minimal')" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-200 bg-white hover:bg-slate-50 transition-colors shadow-sm">Minimal</button>
+                <button (click)="applyTemplate('bold')" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-blue-600 bg-blue-600 text-white hover:bg-blue-700 transition-colors shadow-sm shadow-blue-500/30">Bold</button>
+                <button (click)="applyTemplate('dark')" class="px-3 py-1.5 text-xs font-bold rounded-lg border border-slate-800 bg-slate-900 text-white hover:bg-slate-800 transition-colors shadow-sm">Dark</button>
              </div>
           </div>
           
-          <div class="flex gap-3 relative">
-             <button (click)="saveDraft()" class="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors border border-transparent hover:border-slate-200">Save Draft</button>
-             
-             <!-- Schedule Button & Popover -->
-             <div class="relative">
-                <button (click)="openSchedule()" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md shadow-blue-600/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
-                    Schedule
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                </button>
-
-                @if (showSchedulePopover()) {
-                    <!-- IOS Style Scheduler Popover -->
-                    <div class="absolute top-full right-0 mt-2 bg-white rounded-3xl shadow-2xl border border-slate-200 w-[340px] overflow-hidden animate-scale-in z-50 origin-top-right">
-                      
-                      <!-- Header -->
-                      <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                          <span class="font-bold text-slate-900">Schedule Post</span>
-                          <button (click)="showSchedulePopover.set(false)" class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-300">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                          </button>
-                      </div>
-
-                      <div class="p-5 space-y-6">
-                          <!-- IOS Calendar View -->
-                          <div>
-                            <div class="flex justify-between items-center mb-4 px-2">
-                                <button (click)="changeMonth(-1)" class="text-blue-600 hover:bg-blue-50 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg></button>
-                                <span class="font-bold text-slate-800 text-sm">{{ currentMonthName() }} {{ currentYear() }}</span>
-                                <button (click)="changeMonth(1)" class="text-blue-600 hover:bg-blue-50 rounded-full p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
-                            </div>
-                            <div class="grid grid-cols-7 gap-1 text-center text-xs font-semibold text-slate-400 mb-2">
-                                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
-                            </div>
-                            <div class="grid grid-cols-7 gap-1 text-center">
-                                @for (day of calendarDays(); track $index) {
-                                  @if (day === 0) {
-                                      <div></div>
-                                  } @else {
-                                      <button 
-                                        (click)="selectDate(day)"
-                                        [class.bg-blue-600]="isSelectedDate(day)"
-                                        [class.text-white]="isSelectedDate(day)"
-                                        [class.text-slate-700]="!isSelectedDate(day)"
-                                        class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium hover:bg-slate-100 transition-colors mx-auto"
-                                      >
-                                        {{ day }}
-                                      </button>
-                                  }
-                                }
-                            </div>
-                          </div>
-                          <!-- IOS Time Picker -->
-                          <div class="bg-slate-50 rounded-xl p-3 flex justify-center gap-2 items-center">
-                            <div class="h-24 w-12 overflow-y-auto snap-y snap-mandatory custom-scrollbar text-center">
-                                @for (h of hours; track h) {
-                                  <div (click)="selectedHour = h" [class.text-blue-600]="selectedHour === h" [class.font-bold]="selectedHour === h" class="h-8 flex items-center justify-center snap-center cursor-pointer text-sm text-slate-400 hover:text-slate-800 transition-colors">{{ h }}</div>
-                                }
-                            </div>
-                            <span class="font-bold text-slate-300">:</span>
-                            <div class="h-24 w-12 overflow-y-auto snap-y snap-mandatory custom-scrollbar text-center">
-                                @for (m of minutes; track m) {
-                                  <div (click)="selectedMinute = m" [class.text-blue-600]="selectedMinute === m" [class.font-bold]="selectedMinute === m" class="h-8 flex items-center justify-center snap-center cursor-pointer text-sm text-slate-400 hover:text-slate-800 transition-colors">{{ m }}</div>
-                                }
-                            </div>
-                            <div class="h-24 w-12 overflow-y-auto snap-y snap-mandatory custom-scrollbar text-center border-l border-slate-200 ml-2 pl-2">
-                                <div (click)="selectedAmPm = 'AM'" [class.text-blue-600]="selectedAmPm === 'AM'" [class.font-bold]="selectedAmPm === 'AM'" class="h-8 flex items-center justify-center snap-center cursor-pointer text-xs text-slate-400">AM</div>
-                                <div (click)="selectedAmPm = 'PM'" [class.text-blue-600]="selectedAmPm === 'PM'" [class.font-bold]="selectedAmPm === 'PM'" class="h-8 flex items-center justify-center snap-center cursor-pointer text-xs text-slate-400">PM</div>
-                            </div>
-                          </div>
-                          <button (click)="confirmSchedule()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-sm shadow-lg shadow-blue-500/20 transition-all active:scale-95">
-                            Schedule for {{ getFormattedSchedule() }}
-                          </button>
-                      </div>
-                    </div>
-                    
-                    <!-- Backdrop -->
-                    <div class="fixed inset-0 z-40 bg-transparent" (click)="showSchedulePopover.set(false)"></div>
-                }
-             </div>
+          <div class="flex gap-3">
+             <button (click)="saveDraft()" class="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors border border-transparent hover:border-slate-200">Save Draft</button>
+             <button (click)="openSchedule()" class="px-4 py-2 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-md shadow-blue-600/20 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                 Schedule
+             </button>
           </div>
        </div>
 
        <div class="flex flex-1 overflow-hidden">
           
-          <!-- LEFT SIDEBAR: Controls -->
-          <div class="w-96 bg-white border-r border-slate-200 flex flex-col overflow-hidden shrink-0 z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+          <!-- LEFT SIDEBAR: Slide Management -->
+          <div class="w-[400px] bg-white border-r border-slate-200 flex flex-col overflow-hidden shrink-0 z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
              
-             <!-- Tabs for Sidebar -->
-             <div class="flex border-b border-slate-100">
-                <button (click)="activeTab.set('content')" [class.border-blue-600]="activeTab() === 'content'" [class.text-blue-600]="activeTab() === 'content'" class="flex-1 py-4 text-sm font-semibold text-slate-500 border-b-2 border-transparent hover:text-slate-800 transition-colors bg-slate-50/50">Content</button>
-                <button (click)="activeTab.set('design')" [class.border-blue-600]="activeTab() === 'design'" [class.text-blue-600]="activeTab() === 'design'" class="flex-1 py-4 text-sm font-semibold text-slate-500 border-b-2 border-transparent hover:text-slate-800 transition-colors bg-slate-50/50">Design & Profile</button>
+             <!-- Navigation Tabs -->
+             <div class="flex border-b border-slate-100 p-1 bg-slate-50/50">
+                <button (click)="activeTab.set('content')" [class.bg-white]="activeTab() === 'content'" [class.shadow-sm]="activeTab() === 'content'" [class.text-blue-600]="activeTab() === 'content'" class="flex-1 py-2 text-sm font-bold text-slate-500 rounded-md transition-all">Content</button>
+                <button (click)="activeTab.set('design')" [class.bg-white]="activeTab() === 'design'" [class.shadow-sm]="activeTab() === 'design'" [class.text-blue-600]="activeTab() === 'design'" class="flex-1 py-2 text-sm font-bold text-slate-500 rounded-md transition-all">Design & Profile</button>
              </div>
 
-             <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+             <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-[#FAFAFA]">
                 
                 @if (activeTab() === 'content') {
                    <!-- AI Generator -->
-                   <div class="mb-8 bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-blue-100">
-                      <div class="flex items-center gap-2 mb-3 text-xs font-bold text-blue-600 uppercase tracking-wider">
-                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                         AI Magic Generator
+                   <div class="mb-6 bg-white p-4 rounded-xl border border-blue-100 shadow-sm relative overflow-hidden group">
+                      <div class="absolute inset-0 bg-blue-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+                      <div class="relative z-10">
+                          <label class="text-xs font-extrabold text-blue-600 uppercase tracking-wider mb-2 block flex items-center gap-1">
+                             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                             AI Magic Generator
+                          </label>
+                          <textarea [(ngModel)]="topic" (keyup.enter)="generateSlides()" rows="2" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-3 text-sm mb-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all resize-none font-medium text-slate-700" placeholder="e.g. 5 ways to improve productivity..."></textarea>
+                          <button (click)="generateSlides()" [disabled]="isLoading()" class="w-full bg-blue-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-blue-700 transition-all disabled:opacity-70 shadow-sm hover:shadow-md active:scale-95 flex items-center justify-center gap-2">
+                             {{ isLoading() ? 'Generating...' : 'Generate Slides' }}
+                             <svg *ngIf="!isLoading()" class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                          </button>
                       </div>
-                      <textarea [(ngModel)]="topic" (keyup.enter)="generateSlides()" rows="2" class="w-full bg-white border border-blue-200 rounded-xl p-3 text-sm mb-3 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 placeholder:text-blue-300 transition-all resize-none" placeholder="What should this carousel be about?"></textarea>
-                      <button (click)="generateSlides()" [disabled]="isLoading()" class="w-full bg-blue-600 text-white text-xs font-bold py-2.5 rounded-lg hover:bg-blue-700 transition-all disabled:opacity-70 shadow-sm hover:shadow-md active:scale-95">
-                         {{ isLoading() ? 'Generating Magic...' : 'Generate Slides' }}
-                      </button>
                    </div>
 
                    <!-- Slides List -->
-                   <div class="space-y-4 pb-10">
-                      <div class="flex justify-between items-center px-1">
+                   <div class="space-y-3 pb-10">
+                      <div class="flex justify-between items-center px-1 mb-2">
                           <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Slides ({{ slides().length }})</span>
                       </div>
 
+                      @if (slides().length === 0) {
+                        <div class="text-center py-8 text-slate-400 text-sm">
+                            <p>No slides yet. Generate with AI or add manually.</p>
+                        </div>
+                      }
+
                       @for (slide of slides(); track $index) {
-                         <div class="p-4 rounded-xl border transition-all relative group cursor-pointer" 
+                         <div class="bg-white p-4 rounded-xl border shadow-sm relative group cursor-pointer transition-all hover:shadow-md" 
                               [class.border-blue-500]="activeSlideIndex() === $index"
-                              [class.bg-blue-50]="activeSlideIndex() === $index"
-                              [class.ring-1]="activeSlideIndex() === $index"
-                              [class.ring-blue-500]="activeSlideIndex() === $index"
+                              [class.ring-2]="activeSlideIndex() === $index"
+                              [class.ring-blue-100]="activeSlideIndex() === $index"
                               [class.border-slate-200]="activeSlideIndex() !== $index"
-                              [class.bg-white]="activeSlideIndex() !== $index"
-                              [class.hover:border-blue-300]="activeSlideIndex() !== $index"
                               (click)="activeSlideIndex.set($index)"
                          >
-                            <div class="flex justify-between items-center mb-2">
-                               <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full" 
-                                     [class.bg-blue-200]="activeSlideIndex() === $index" 
+                            <div class="flex items-center gap-3 mb-3">
+                               <span class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold" 
+                                     [class.bg-blue-100]="activeSlideIndex() === $index" 
                                      [class.text-blue-700]="activeSlideIndex() === $index"
                                      [class.bg-slate-100]="activeSlideIndex() !== $index"
                                      [class.text-slate-500]="activeSlideIndex() !== $index"
                                >
-                                  #{{ $index + 1 }}
+                                  {{ $index + 1 }}
                                </span>
+                               <span class="text-xs font-bold text-slate-400 uppercase tracking-wide flex-1">Slide Content</span>
                                <button (click)="removeSlide($index); $event.stopPropagation()" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-1 hover:bg-red-50 rounded">
-                                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                </button>
                             </div>
-                            <input [(ngModel)]="slide.title" class="w-full bg-transparent font-bold text-slate-800 text-sm mb-2 outline-none placeholder:text-slate-300 border-b border-transparent focus:border-blue-300 transition-colors pb-1" placeholder="Headline">
-                            <textarea [(ngModel)]="slide.body" rows="3" class="w-full bg-transparent text-xs text-slate-600 outline-none resize-none placeholder:text-slate-300 leading-relaxed" placeholder="Body text..."></textarea>
+                            
+                            <input [(ngModel)]="slide.title" class="w-full bg-slate-50 border border-transparent focus:bg-white focus:border-blue-300 rounded px-2 py-1.5 font-bold text-slate-800 text-sm mb-2 outline-none transition-colors" placeholder="Headline">
+                            <textarea [(ngModel)]="slide.body" rows="3" class="w-full bg-slate-50 border border-transparent focus:bg-white focus:border-blue-300 rounded px-2 py-1.5 text-xs text-slate-600 outline-none resize-none leading-relaxed" placeholder="Body text..."></textarea>
                          </div>
                       }
-                      <button (click)="addSlide()" class="w-full py-4 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-sm font-bold hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group">
-                         <div class="w-6 h-6 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center transition-colors">+</div>
-                         Add Slide
+                      
+                      <button (click)="addSlide()" class="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-400 text-sm font-bold hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all flex items-center justify-center gap-2 group">
+                         <div class="w-6 h-6 rounded-full bg-slate-200 group-hover:bg-blue-200 flex items-center justify-center transition-colors text-white font-bold text-lg">+</div>
+                         Add New Slide
                       </button>
                    </div>
                 } 
                 
                 @else {
                    <!-- Design & Profile Settings -->
-                   <div class="space-y-8 animate-fade-in">
+                   <div class="space-y-6 animate-fade-in">
                       
                       <!-- Profile Section -->
-                      <div>
-                         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                            Profile Info
-                         </h3>
-                         <div class="space-y-5">
+                      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Profile Info</h3>
+                         <div class="space-y-4">
                             <div>
-                               <label class="block text-xs font-semibold text-slate-700 mb-1.5">Name</label>
-                               <input [(ngModel)]="authorName" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                               <label class="block text-xs font-bold text-slate-700 mb-1">Name</label>
+                               <input [(ngModel)]="authorName" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all">
                             </div>
                             <div>
-                               <label class="block text-xs font-semibold text-slate-700 mb-1.5">Username</label>
-                               <input [(ngModel)]="authorHandle" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition-all">
+                               <label class="block text-xs font-bold text-slate-700 mb-1">Handle</label>
+                               <input [(ngModel)]="authorHandle" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 transition-all">
                             </div>
                             <div>
-                               <label class="block text-xs font-semibold text-slate-700 mb-1.5">Profile Picture</label>
+                               <label class="block text-xs font-bold text-slate-700 mb-1">Photo</label>
                                <div class="flex gap-3 items-center">
-                                  <img [src]="authorAvatar()" class="w-12 h-12 rounded-full object-cover border border-slate-200 shrink-0 shadow-sm">
-                                  <div class="relative">
-                                      <input type="file" (change)="onAvatarUpload($event)" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10">
-                                      <button class="bg-white border border-slate-200 text-slate-600 text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors shadow-sm">
-                                         Upload Photo
-                                      </button>
+                                  <img [src]="authorAvatar()" class="w-10 h-10 rounded-full object-cover border border-slate-200 shrink-0">
+                                  <div class="relative overflow-hidden">
+                                      <button class="bg-white border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">Change Photo</button>
+                                      <input type="file" (change)="onAvatarUpload($event)" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer">
                                   </div>
                                </div>
                             </div>
                          </div>
                       </div>
 
-                      <div class="h-px bg-slate-100 w-full"></div>
-
-                      <!-- Appearance Section -->
-                      <div>
-                         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
-                            Design
-                         </h3>
-                         <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                      <!-- Colors Section -->
+                      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                         <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Theme Colors</h3>
+                         <div class="space-y-4">
                             <div class="flex items-center justify-between">
-                               <label class="text-sm font-medium text-slate-700">Background</label>
-                               <div class="flex items-center gap-3">
-                                  <span class="text-xs text-slate-400 font-mono bg-white px-2 py-1 rounded border border-slate-200">{{ backgroundColor() }}</span>
-                                  <div class="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-slate-200 hover:scale-110 transition-transform">
-                                      <input type="color" [ngModel]="backgroundColor()" (ngModelChange)="backgroundColor.set($event)" class="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] p-0 cursor-pointer border-0">
-                                  </div>
+                               <label class="text-sm font-bold text-slate-700">Background</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [ngModel]="backgroundColor()" (ngModelChange)="backgroundColor.set($event)" class="w-8 h-8 rounded cursor-pointer border-0 p-0">
+                                  <span class="text-xs font-mono text-slate-400">{{ backgroundColor() }}</span>
                                </div>
                             </div>
                             <div class="flex items-center justify-between">
-                               <label class="text-sm font-medium text-slate-700">Text Color</label>
-                               <div class="flex items-center gap-3">
-                                  <span class="text-xs text-slate-400 font-mono bg-white px-2 py-1 rounded border border-slate-200">{{ textColor() }}</span>
-                                  <div class="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-slate-200 hover:scale-110 transition-transform">
-                                      <input type="color" [ngModel]="textColor()" (ngModelChange)="textColor.set($event)" class="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] p-0 cursor-pointer border-0">
-                                  </div>
+                               <label class="text-sm font-bold text-slate-700">Text</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [ngModel]="textColor()" (ngModelChange)="textColor.set($event)" class="w-8 h-8 rounded cursor-pointer border-0 p-0">
+                                  <span class="text-xs font-mono text-slate-400">{{ textColor() }}</span>
                                </div>
                             </div>
                             <div class="flex items-center justify-between">
-                               <label class="text-sm font-medium text-slate-700">Accent Color</label>
-                               <div class="flex items-center gap-3">
-                                  <span class="text-xs text-slate-400 font-mono bg-white px-2 py-1 rounded border border-slate-200">{{ accentColor() }}</span>
-                                  <div class="relative w-8 h-8 rounded-full overflow-hidden shadow-sm border border-slate-200 hover:scale-110 transition-transform">
-                                      <input type="color" [ngModel]="accentColor()" (ngModelChange)="accentColor.set($event)" class="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] p-0 cursor-pointer border-0">
-                                  </div>
+                               <label class="text-sm font-bold text-slate-700">Accent</label>
+                               <div class="flex items-center gap-2">
+                                  <input type="color" [ngModel]="accentColor()" (ngModelChange)="accentColor.set($event)" class="w-8 h-8 rounded cursor-pointer border-0 p-0">
+                                  <span class="text-xs font-mono text-slate-400">{{ accentColor() }}</span>
                                </div>
                             </div>
                          </div>
@@ -262,74 +184,82 @@ declare var html2canvas: any;
           </div>
 
           <!-- MAIN PREVIEW AREA -->
-          <div class="flex-1 bg-slate-100 relative overflow-hidden flex flex-col">
-             <!-- Background Pattern -->
-             <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 24px 24px;"></div>
+          <div class="flex-1 bg-slate-100 relative overflow-hidden flex flex-col items-center justify-center">
+             <!-- Dot Pattern Background -->
+             <div class="absolute inset-0 opacity-[0.03]" style="background-image: radial-gradient(#000 1px, transparent 1px); background-size: 20px 20px;"></div>
              
-             <!-- Instructions / Top Label -->
-             <div class="absolute top-6 left-0 right-0 text-center pointer-events-none z-10">
-                 <span class="bg-white/80 backdrop-blur px-4 py-1.5 rounded-full text-xs font-bold text-slate-500 shadow-sm border border-slate-200/50">
-                    Showing all {{ slides().length }} slides • Click to edit
-                 </span>
+             <!-- Preview Header -->
+             <div class="absolute top-6 z-10 bg-white/90 backdrop-blur border border-slate-200 px-4 py-2 rounded-full shadow-sm">
+                <span class="text-xs font-bold text-slate-500">Live Preview • {{ slides().length }} Slides</span>
              </div>
 
              <!-- Scrollable Preview Area -->
-             <div class="flex-1 overflow-x-auto overflow-y-hidden custom-scrollbar flex items-center px-12 gap-8 snap-x snap-mandatory">
+             <div class="w-full overflow-x-auto overflow-y-hidden custom-scrollbar flex items-center px-12 gap-8 snap-x snap-mandatory py-12">
                 
+                @if (slides().length === 0) {
+                     <div class="flex flex-col items-center justify-center text-slate-400">
+                        <div class="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-4">
+                            <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </div>
+                        <p>No slides to preview</p>
+                     </div>
+                }
+
                 @for (slide of slides(); track $index) {
                    <!-- Single Slide Preview Card -->
                    <div [id]="'slide-' + $index"
-                        class="w-[360px] aspect-[4/5] shadow-2xl rounded-none shrink-0 flex flex-col relative transition-all duration-300 snap-center cursor-pointer group"
+                        class="w-[360px] aspect-[4/5] shadow-xl rounded-none shrink-0 flex flex-col relative transition-all duration-300 snap-center cursor-pointer group bg-white"
                         [style.background-color]="backgroundColor()"
                         [style.color]="textColor()"
                         [class.ring-4]="activeSlideIndex() === $index"
                         [class.ring-blue-500]="activeSlideIndex() === $index"
                         [class.scale-105]="activeSlideIndex() === $index"
-                        [class.hover:translate-y-[-4px]]="activeSlideIndex() !== $index"
-                        [class.opacity-50]="activeSlideIndex() !== $index && hoverIndex !== -1 && hoverIndex !== $index"
-                        (mouseenter)="hoverIndex = $index"
-                        (mouseleave)="hoverIndex = -1"
+                        [class.opacity-50]="activeSlideIndex() !== $index && activeSlideIndex() !== -1"
+                        [class.hover:opacity-100]="activeSlideIndex() !== $index"
                         (click)="activeSlideIndex.set($index); activeTab.set('content')"
                    >
-                      <!-- Download Button Overlay (Visible on Hover/Active) -->
-                       <div class="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button (click)="downloadSlide($index); $event.stopPropagation()" class="bg-white/90 hover:bg-white text-slate-700 p-2 rounded-full shadow-lg border border-slate-200/50 backdrop-blur-sm transition-all hover:scale-110" title="Download Image">
+                      <!-- Download Button -->
+                       <div class="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <button (click)="downloadSlide($index); $event.stopPropagation()" class="bg-white text-slate-800 p-2 rounded-full shadow-lg border border-slate-100 hover:scale-110 transition-transform">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                          </button>
                        </div>
 
-                      <!-- Slide Header -->
-                      <div class="p-8 pb-4 flex items-center gap-4">
-                         <img [src]="authorAvatar()" class="w-12 h-12 rounded-full border-2 border-white/20 shadow-sm object-cover">
-                         <div>
-                            <div class="font-bold text-base leading-tight">{{ authorName() }}</div>
-                            <div class="text-xs opacity-70">{{ authorHandle() }}</div>
-                         </div>
-                      </div>
+                      <!-- Slide Content -->
+                      <div class="flex-1 p-8 flex flex-col">
+                          <!-- Author Header -->
+                          <div class="flex items-center gap-3 mb-8">
+                             <img [src]="authorAvatar()" class="w-10 h-10 rounded-full border-2 border-white/20 shadow-sm object-cover">
+                             <div>
+                                <div class="font-bold text-sm leading-tight">{{ authorName() }}</div>
+                                <div class="text-[10px] opacity-70 uppercase tracking-wide font-bold">{{ authorHandle() }}</div>
+                             </div>
+                          </div>
 
-                      <!-- Slide Body -->
-                      <div class="flex-1 px-8 flex flex-col justify-center">
-                         <h2 class="text-3xl font-extrabold mb-6 leading-tight" [style.color]="activeSlideIndex() === $index || hoverIndex === $index ? accentColor() : 'inherit'">{{ slide.title }}</h2>
-                         <p class="text-xl opacity-90 leading-relaxed whitespace-pre-wrap font-medium">{{ slide.body }}</p>
-                      </div>
+                          <!-- Body -->
+                          <div class="flex-1 flex flex-col justify-center">
+                             <h2 class="text-3xl font-extrabold mb-4 leading-tight" [style.color]="activeSlideIndex() === $index ? accentColor() : 'inherit'">{{ slide.title }}</h2>
+                             <p class="text-lg opacity-90 leading-relaxed font-medium whitespace-pre-wrap">{{ slide.body }}</p>
+                          </div>
 
-                      <!-- Slide Footer -->
-                      <div class="p-8 pt-0 flex justify-between items-center opacity-60">
-                         <div class="font-bold text-sm">superup.ai</div>
-                         <div class="text-sm font-medium">{{ $index + 1 }} / {{ slides().length }}</div>
+                          <!-- Footer -->
+                          <div class="pt-8 flex justify-between items-center opacity-50 border-t border-current/10 mt-auto">
+                             <div class="font-bold text-xs">postrocket.ai</div>
+                             <div class="text-xs font-bold">{{ $index + 1 }} / {{ slides().length }}</div>
+                          </div>
                       </div>
                    </div>
                 }
                 
-                <!-- Add Slide Button at end of scroll -->
-                <button (click)="addSlide()" class="w-24 h-24 rounded-full bg-white shadow-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50 transition-all shrink-0 ml-4 group">
-                   <div class="w-10 h-10 rounded-full bg-slate-100 group-hover:bg-blue-100 flex items-center justify-center mb-1 transition-colors">
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                   </div>
-                   <span class="text-xs font-bold">Add Page</span>
-                </button>
-                
-                <div class="w-12 shrink-0"></div> <!-- Spacer -->
+                @if (slides().length > 0) {
+                    <!-- Add Slide Action Card -->
+                    <div (click)="addSlide()" class="w-[360px] aspect-[4/5] rounded-xl border-4 border-dashed border-slate-300 flex flex-col items-center justify-center gap-4 text-slate-400 hover:text-blue-600 hover:border-blue-400 hover:bg-blue-50/50 transition-all cursor-pointer shrink-0 group">
+                       <div class="w-16 h-16 rounded-full bg-slate-200 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4"></path></svg>
+                       </div>
+                       <span class="font-bold text-lg">Add New Page</span>
+                    </div>
+                }
 
              </div>
           </div>
@@ -338,43 +268,24 @@ declare var html2canvas: any;
     </div>
   `,
   styles: [`
-    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-scale-in { animation: scaleIn 0.2s ease-out; }
-    @keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     .custom-scrollbar::-webkit-scrollbar { height: 12px; width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 6px; border: 3px solid transparent; background-clip: content-box; }
     .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: #94A3B8; }
+    .animate-fade-in { animation: fadeIn 0.3s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   `]
 })
 export class CarouselMakerComponent {
   // Content Signals
   topic = '';
-  slides = signal<{title: string, body: string}[]>([
-    { title: 'The Perfect Hook', body: 'Start your carousel with a statement that makes scrolling irresistible.' },
-    { title: 'Provide Value', body: 'Share actionable insights that solve a specific problem for your audience.' },
-    { title: 'The Conclusion', body: 'Summarize the key takeaways and ask a question to drive engagement.' }
-  ]);
+  // START EMPTY
+  slides = signal<{title: string, body: string}[]>([]);
   
   // State Signals
   activeTab = signal<'content' | 'design'>('content');
   activeSlideIndex = signal(0);
   isLoading = signal(false);
-  hoverIndex = -1; // Local state for hover effect
-
-  // Scheduler State
-  showSchedulePopover = signal(false);
-  currentDate = new Date();
-  displayMonth = signal(this.currentDate.getMonth());
-  displayYear = signal(this.currentDate.getFullYear());
-  selectedDay = signal(this.currentDate.getDate());
-
-  hours = Array.from({length: 12}, (_, i) => (i + 1).toString().padStart(2, '0'));
-  minutes = ['00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'];
-  selectedHour = '09';
-  selectedMinute = '00';
-  selectedAmPm = 'AM';
 
   // Design & Profile Signals
   authorName = signal('');
@@ -389,42 +300,19 @@ export class CarouselMakerComponent {
   gemini = inject(GeminiService);
   authService = inject(AuthService);
 
-  // Computed Calendar Logic
-  calendarDays = computed(() => {
-    const year = this.displayYear();
-    const month = this.displayMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    const days: number[] = [];
-    for (let i = 0; i < firstDay; i++) days.push(0); // padding
-    for (let i = 1; i <= daysInMonth; i++) days.push(i);
-    return days;
-  });
-
-  currentMonthName = computed(() => {
-    return new Date(this.displayYear(), this.displayMonth()).toLocaleString('default', { month: 'long' });
-  });
-
-  currentYear = computed(() => this.displayYear());
-
   constructor() {
-    // Initialize profile defaults
     const user = this.authService.currentUser();
     if (user) {
        this.authorName.set(user.name);
        this.authorHandle.set('@' + user.name.replace(/\s/g, '').toLowerCase());
-       // Use picsum with seed to get consistent image for user
        const seed = user.name.replace(/\s/g, '');
        this.authorAvatar.set(`https://picsum.photos/seed/${seed}/100/100`);
     }
 
-    // Initialize from draft if exists
     effect(() => {
       const draft = this.store.activeDraft();
       if (draft && draft.type === 'carousel' && draft.slides) {
         this.slides.set(draft.slides);
-        // Note: In a real app we would save/load styles in the draft object too
       }
     });
   }
@@ -477,12 +365,12 @@ export class CarouselMakerComponent {
           case 'bold':
               this.backgroundColor.set('#2563EB');
               this.textColor.set('#ffffff');
-              this.accentColor.set('#FCD34D'); // Yellow accent
+              this.accentColor.set('#FCD34D');
               break;
           case 'dark':
               this.backgroundColor.set('#0F172A');
               this.textColor.set('#ffffff');
-              this.accentColor.set('#38BDF8'); // Sky blue accent
+              this.accentColor.set('#38BDF8');
               break;
       }
   }
@@ -500,8 +388,7 @@ export class CarouselMakerComponent {
   }
 
   addSlide() {
-    this.slides.update(s => [...s, { title: 'New Slide', body: '' }]);
-    // Scroll to new slide (simulated by setting index)
+    this.slides.update(s => [...s, { title: 'New Slide', body: 'Add your content here.' }]);
     setTimeout(() => this.activeSlideIndex.set(this.slides().length - 1), 100);
   }
 
@@ -518,59 +405,12 @@ export class CarouselMakerComponent {
        type: 'carousel',
        content: this.slides()[0].title + "...", 
        slides: this.slides(),
-       // We should save styles here too in future
     });
     this.store.triggerNotification('Success', 'Carousel saved to drafts!');
   }
 
-  // --- Scheduler Logic ---
   openSchedule() {
-    this.showSchedulePopover.set(true);
-  }
-
-  changeMonth(delta: number) {
-    let newMonth = this.displayMonth() + delta;
-    let newYear = this.displayYear();
-
-    if (newMonth > 11) { newMonth = 0; newYear++; }
-    else if (newMonth < 0) { newMonth = 11; newYear--; }
-
-    this.displayMonth.set(newMonth);
-    this.displayYear.set(newYear);
-  }
-
-  selectDate(day: number) {
-    this.selectedDay.set(day);
-  }
-
-  isSelectedDate(day: number) {
-    return this.selectedDay() === day;
-  }
-
-  getFormattedSchedule() {
-    return `${this.currentMonthName()} ${this.selectedDay()} at ${this.selectedHour}:${this.selectedMinute} ${this.selectedAmPm}`;
-  }
-
-  confirmSchedule() {
-    let hour = parseInt(this.selectedHour);
-    if (this.selectedAmPm === 'PM' && hour !== 12) hour += 12;
-    if (this.selectedAmPm === 'AM' && hour === 12) hour = 0;
-
-    const scheduledDate = new Date(this.displayYear(), this.displayMonth(), this.selectedDay(), hour, parseInt(this.selectedMinute));
-
-    this.store.addPost({
-       type: 'carousel',
-       content: this.slides()[0].title + "...",
-       slides: this.slides(),
-       scheduledDate: scheduledDate,
-       status: 'scheduled'
-    });
-    
-    this.showSchedulePopover.set(false);
-    this.store.triggerNotification('Scheduled', `Carousel scheduled for ${scheduledDate.toLocaleString()}`);
-    
-    // Reset defaults
-    this.topic = '';
-    this.store.activeDraft.set(null);
+    // Placeholder for schedule logic
+    this.store.triggerNotification('Info', 'Scheduling feature coming soon.');
   }
 }

@@ -85,7 +85,7 @@ import { GeminiService } from '../../services/gemini.service';
 
                             <div class="flex justify-end mt-3 gap-3">
                                <button (click)="store.removeComment(comment.id)" class="text-slate-400 hover:text-slate-600 text-sm font-medium px-4 py-2">Skip</button>
-                               <button (click)="sendReply(comment.id)" class="bg-[#0F172A] text-white font-bold text-sm px-6 py-2 rounded-lg hover:bg-slate-800 shadow-lg shadow-slate-900/10 transition-all">
+                               <button (click)="sendReply(comment.id)" class="bg-[#0065FF] text-white font-bold text-sm px-6 py-2 rounded-lg hover:bg-[#0052CC] shadow-lg shadow-blue-500/10 transition-all">
                                   Reply & Next
                                </button>
                             </div>

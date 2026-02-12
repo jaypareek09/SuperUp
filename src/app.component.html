@@ -2,15 +2,14 @@
 @if (authService.currentUser()) {
   <app-dashboard />
 } @else {
-  <div class="min-h-screen bg-[#F5F5F7] text-[#1d1d1f] antialiased selection:bg-blue-100 selection:text-blue-900">
+  <div class="min-h-screen bg-[#F8FAFC] text-[#0F172A] antialiased selection:bg-blue-100 selection:text-blue-900">
     <app-header />
     
     <main>
       <app-hero />
+      <app-showcase />
       <app-how-it-works />
-      <app-features />
-      <app-testimonials />
-      <app-demo />
+      <app-pricing />
     </main>
     
     <app-footer />

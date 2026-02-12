@@ -1,11 +1,19 @@
 
 import { Injectable, signal, computed } from '@angular/core';
 
-export type View = 'HOME' | 'WRITE' | 'CAROUSEL' | 'VIRAL' | 'EXTENSION' | 'ENGAGEMENT' | 'PROSPECTS';
+export type View = 'HOME' | 'WRITE' | 'SCHEDULE' | 'MY_POSTS' | 'CAROUSEL' | 'VIRAL' | 'ENGAGEMENT' | 'SETTINGS' | 'ANALYTICS';
 export type OnboardingStep = 'IDLE' | 'INSTALL_PROMPT' | 'SCANNING' | 'CONFIRM_PROFILE' | 'COMPLETE';
+
+export interface LinkedProfile {
+  id: string;
+  name: string;
+  handle: string;
+  avatar: string;
+}
 
 export interface Post {
   id: string;
+  profileId: string; // Linked to specific profile
   type: 'text' | 'carousel';
   content: string; 
   slides?: { title: string; body: string }[];
@@ -13,6 +21,7 @@ export interface Post {
   scheduledDate: Date | null;
   status: 'draft' | 'scheduled' | 'published';
   stats?: { views: number; likes: number; comments: number };
+  lastModified?: Date;
 }
 
 export interface ViralPost {
@@ -68,20 +77,16 @@ export interface ScrapedProfile {
     location: string;
 }
 
-export interface ExtensionPayload {
-  user: ScrapedProfile;
-  stats: ProfileStats;
-  recentPosts: AnalyzedPost[];
-}
-
 @Injectable({
   providedIn: 'root'
 })
 export class StoreService {
   // --- App State ---
   currentView = signal<View>('HOME');
+  isLoadingView = signal(false);
+  loadingMessage = signal('Loading...');
   activeDraft = signal<Post | null>(null); 
-  isExtensionInstalled = signal(false);
+  isConnected = signal(false); 
   
   // Onboarding State
   onboardingStep = signal<OnboardingStep>('IDLE');
@@ -89,6 +94,13 @@ export class StoreService {
 
   // Notification Signal
   activeNotification = signal<{title: string, message: string} | null>(null);
+
+  // --- MULTI-PROFILE STATE ---
+  profiles = signal<LinkedProfile[]>([
+    { id: 'p1', name: 'Alex Johnson', handle: '@alexgrowth', avatar: 'https://picsum.photos/seed/alex/100' },
+    { id: 'p2', name: 'PostRocket Team', handle: '@postrocket', avatar: 'https://picsum.photos/seed/postrocket/100' }
+  ]);
+  activeProfileId = signal<string>('p1');
 
   // --- ANALYTICS STATE ---
   profileStats = signal<ProfileStats>({
@@ -98,19 +110,60 @@ export class StoreService {
     engagementRate: 0
   });
 
+  // START EMPTY - No Demo Data
   analyzedPosts = signal<AnalyzedPost[]>([]);
   posts = signal<Post[]>([]);
   commentsToReply = signal<Comment[]>([]);
   prospects = signal<Prospect[]>([]);
   viralPosts = signal<ViralPost[]>([]);
 
-  // Computed
-  scheduledPosts = computed(() => this.posts().filter(p => p.status === 'scheduled'));
-  drafts = computed(() => this.posts().filter(p => p.status === 'draft'));
+  // Computed Context-Aware Data
+  activeProfile = computed(() => this.profiles().find(p => p.id === this.activeProfileId()) || this.profiles()[0]);
+  
+  // Filter posts based on active profile
+  filteredPosts = computed(() => this.posts().filter(p => p.profileId === this.activeProfileId()));
+
+  scheduledPosts = computed(() => this.filteredPosts().filter(p => p.status === 'scheduled'));
+  drafts = computed(() => this.filteredPosts().filter(p => p.status === 'draft'));
 
   constructor() {
     this.requestNotificationPermission();
-    this.initExtensionListener();
+  }
+
+  // --- Navigation Logic ---
+  navigateTo(view: View) {
+    if (this.currentView() === view) return;
+    
+    this.loadingMessage.set('Loading...');
+    this.isLoadingView.set(true);
+    setTimeout(() => {
+        this.currentView.set(view);
+        this.isLoadingView.set(false);
+    }, 800); 
+  }
+
+  // --- Profile Logic ---
+  switchProfile(profileId: string) {
+      if (this.activeProfileId() === profileId) return;
+      
+      this.loadingMessage.set('Switching Profile...');
+      this.isLoadingView.set(true);
+      setTimeout(() => {
+          this.activeProfileId.set(profileId);
+          this.isLoadingView.set(false);
+          this.triggerNotification('Profile Switched', `Now working as ${this.activeProfile().name}`);
+      }, 500);
+  }
+
+  addProfile(name: string, handle: string) {
+      const newProfile: LinkedProfile = {
+          id: Math.random().toString(36).substring(7),
+          name,
+          handle,
+          avatar: `https://picsum.photos/seed/${name}/100`
+      };
+      this.profiles.update(p => [...p, newProfile]);
+      this.switchProfile(newProfile.id);
   }
 
   // --- Onboarding Logic ---
@@ -119,88 +172,37 @@ export class StoreService {
       this.onboardingStep.set('INSTALL_PROMPT');
   }
 
-  // 1. Start listening for the extension
-  startScanningForExtension() {
-      this.onboardingStep.set('SCANNING');
-      
-      // We send a ping to the extension in case it's already there
-      window.postMessage({ type: 'SUPERUP_PING' }, '*');
-  }
-
-  // 2. Setup Listener for "Real" Data
-  private initExtensionListener() {
-    window.addEventListener('message', (event) => {
-      // Validate origin in production
-      if (event.data && event.data.type === 'SUPERUP_EXTENSION_DATA') {
-         this.handleExtensionData(event.data.payload);
-      }
-    });
-  }
-
-  // 3. Handle Incoming Data
-  private handleExtensionData(payload: ExtensionPayload) {
-      if (this.onboardingStep() === 'SCANNING') {
-          this.detectedProfile.set(payload.user);
-          this.profileStats.set(payload.stats);
-          this.analyzedPosts.set(payload.recentPosts);
-          this.onboardingStep.set('CONFIRM_PROFILE');
-      }
-  }
-
-  // Called when user says "Yes, that's me"
   confirmProfileAndSync() {
       const profile = this.detectedProfile();
       if (!profile) return;
 
-      this.isExtensionInstalled.set(true);
+      this.isConnected.set(true);
       this.onboardingStep.set('COMPLETE');
-      this.triggerNotification('Sync Complete', 'LinkedIn profile connected successfully.');
-  }
-
-  // DEV ONLY: Helper to simulate extension in dev environment since we have no real extension
-  dev_simulateExtensionResponse() {
-    const mockPayload: ExtensionPayload = {
-        user: {
-            name: 'Dev User',
-            headline: 'Testing Profile Integration',
-            avatar: 'https://picsum.photos/200',
-            location: 'Developer Console'
-        },
-        stats: {
-            followers: 1250,
-            profileViews: 450,
-            postImpressions: 15000,
-            engagementRate: 5.2
-        },
-        recentPosts: [
-            { id: 'dev1', content: 'This is a synced post from the extension.', date: '1 day ago', likes: 24, comments: 5, views: 1200, engagement: 2.5 },
-        ]
-    };
-    
-    // Simulate network delay then dispatch event
-    setTimeout(() => {
-        window.postMessage({ type: 'SUPERUP_EXTENSION_DATA', payload: mockPayload }, '*');
-    }, 1500);
+      this.triggerNotification('Success', 'LinkedIn account connected.');
   }
 
   // --- Standard Logic ---
 
-  addPost(post: Omit<Post, 'id' | 'stats'>) {
+  addPost(post: Omit<Post, 'id' | 'stats' | 'lastModified' | 'profileId'>) {
     const newPost: Post = {
       ...post,
       id: Math.random().toString(36).substring(7),
-      stats: { views: 0, likes: 0, comments: 0 }
+      profileId: this.activeProfileId(), // Attach to current profile
+      stats: { views: 0, likes: 0, comments: 0 },
+      lastModified: new Date()
     };
     this.posts.update(posts => [newPost, ...posts]);
   }
 
-  saveDraft(post: Omit<Post, 'id' | 'stats' | 'scheduledDate' | 'status'>) {
+  saveDraft(post: Omit<Post, 'id' | 'stats' | 'scheduledDate' | 'status' | 'lastModified' | 'profileId'>) {
     const newPost: Post = {
       ...post,
       id: Math.random().toString(36).substring(7),
+      profileId: this.activeProfileId(), // Attach to current profile
       scheduledDate: null,
       status: 'draft',
-      stats: { views: 0, likes: 0, comments: 0 }
+      stats: { views: 0, likes: 0, comments: 0 },
+      lastModified: new Date()
     };
     this.posts.update(posts => [newPost, ...posts]);
   }

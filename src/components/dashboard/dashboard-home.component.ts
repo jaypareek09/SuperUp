@@ -2,199 +2,127 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StoreService } from '../../services/store.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard-home',
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="space-y-8 animate-fade-in pb-12">
-      
-      <!-- ANALYTICS SECTION -->
-      <div>
-         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-slate-800">Profile Analytics</h2>
-            @if (store.profileStats().followers > 0) {
-                <div class="flex items-center gap-2">
-                   <span class="flex h-2.5 w-2.5 relative">
-                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                   </span>
-                   <span class="text-xs font-semibold text-slate-500">Live Syncing</span>
-                </div>
-            }
-         </div>
-         
-         @if (store.profileStats().followers === 0) {
-            <!-- EMPTY STATE -->
-            <div class="bg-white rounded-2xl border border-slate-200 border-dashed p-12 text-center flex flex-col items-center">
-                <div class="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-                <h3 class="text-lg font-bold text-slate-900 mb-2">Connect Extension to see Analytics</h3>
-                <p class="text-slate-500 max-w-md mx-auto mb-6">We need to sync with your LinkedIn profile to show your followers, views, and engagement metrics.</p>
-                <button (click)="store.currentView.set('EXTENSION')" class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20">
-                    Go to Extension Setup
-                </button>
-            </div>
-         } @else {
-             <!-- DATA STATE -->
-             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                 <!-- Followers -->
-                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div class="text-slate-500 text-sm font-bold uppercase tracking-wide mb-1">Total Followers</div>
-                    <div class="text-3xl font-extrabold text-slate-900 flex items-end gap-2">
-                       {{ store.profileStats().followers | number }}
-                    </div>
-                 </div>
-
-                 <!-- Impressions -->
-                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div class="text-slate-500 text-sm font-bold uppercase tracking-wide mb-1">Post Impressions</div>
-                    <div class="text-3xl font-extrabold text-slate-900 flex items-end gap-2">
-                       {{ store.profileStats().postImpressions | number }}
-                    </div>
-                 </div>
-
-                 <!-- Profile Views -->
-                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div class="text-slate-500 text-sm font-bold uppercase tracking-wide mb-1">Profile Views</div>
-                    <div class="text-3xl font-extrabold text-slate-900 flex items-end gap-2">
-                       {{ store.profileStats().profileViews | number }}
-                    </div>
-                 </div>
-
-                 <!-- Engagement Rate -->
-                 <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden group">
-                    <div class="text-slate-500 text-sm font-bold uppercase tracking-wide mb-1">Avg. Engagement</div>
-                    <div class="text-3xl font-extrabold text-slate-900 flex items-end gap-2">
-                       {{ store.profileStats().engagementRate }}%
-                    </div>
-                 </div>
+    <div class="h-full flex flex-col bg-white">
+       
+       <!-- Top Bar (Search) - Consistent with MyPosts -->
+      <div class="px-6 py-4 flex items-center justify-between">
+          <div class="relative w-full max-w-[720px]">
+             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
              </div>
-         }
+             <input 
+                type="text" 
+                placeholder="Search everything..." 
+                class="block w-full pl-10 pr-3 py-3 border-none rounded-full bg-[#E9EEF6] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 focus:shadow-sm sm:text-sm transition-shadow"
+             >
+          </div>
       </div>
 
-      <!-- Post Performance Table -->
-      @if (store.analyzedPosts().length > 0) {
-          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-             <div class="p-6 border-b border-slate-100 flex justify-between items-center">
-                 <h3 class="font-bold text-slate-900 text-lg">Post Performance</h3>
-                 <button class="text-blue-600 text-sm font-semibold hover:text-blue-700">View All Posts</button>
-             </div>
-             <div class="overflow-x-auto">
-                 <table class="w-full text-left">
-                     <thead>
-                         <tr class="bg-slate-50 border-b border-slate-100">
-                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider w-1/2">Post Content</th>
-                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Views</th>
-                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Likes</th>
-                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Comments</th>
-                             <th class="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Eng. Rate</th>
-                         </tr>
-                     </thead>
-                     <tbody class="divide-y divide-slate-50">
-                         @for (post of store.analyzedPosts(); track post.id) {
-                             <tr class="hover:bg-blue-50/30 transition-colors">
-                                 <td class="px-6 py-4">
-                                     <div class="font-medium text-slate-900 line-clamp-1 mb-1">{{ post.content }}</div>
-                                     <div class="text-xs text-slate-400">Posted {{ post.date }}</div>
-                                 </td>
-                                 <td class="px-6 py-4 text-right font-mono text-slate-600">{{ post.views | number }}</td>
-                                 <td class="px-6 py-4 text-right font-mono text-blue-600 font-bold">{{ post.likes | number }}</td>
-                                 <td class="px-6 py-4 text-right font-mono text-slate-600">{{ post.comments | number }}</td>
-                                 <td class="px-6 py-4 text-right">
-                                     <span class="font-bold text-xs bg-slate-100 px-2 py-1 rounded">{{ post.engagement }}%</span>
-                                 </td>
-                             </tr>
-                         }
-                     </tbody>
-                 </table>
-             </div>
-          </div>
-      }
-
-      <!-- Queue & Drafts Row -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        <!-- Queue Section -->
-        <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-              <h3 class="font-bold text-slate-900 text-lg">Upcoming Queue</h3>
-          </div>
-          
-          @if (store.scheduledPosts().length > 0) {
-              <div class="divide-y divide-slate-100">
-                @for (post of store.scheduledPosts(); track post.id) {
-                    <div class="p-6 hover:bg-slate-50 transition-colors flex gap-6 items-start group">
-                      <div class="shrink-0 w-16 text-center bg-slate-100 rounded-lg p-2">
-                          <div class="text-xs font-bold text-slate-500 uppercase">{{ post.scheduledDate | date:'MMM' }}</div>
-                          <div class="text-xl font-bold text-slate-900">{{ post.scheduledDate | date:'dd' }}</div>
-                      </div>
-                      <div class="flex-1">
-                          <div class="flex items-center gap-2 mb-2">
-                            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 uppercase tracking-wide">
-                                {{ post.type }}
-                            </span>
-                            <span class="text-xs text-slate-400 font-medium">
-                                {{ post.scheduledDate | date:'shortTime' }}
-                            </span>
-                          </div>
-                          <p class="text-slate-700 text-sm line-clamp-2 leading-relaxed">
-                            {{ post.content || (post.slides ? post.slides[0].title : 'No content') }}
-                          </p>
-                      </div>
-                      <button (click)="store.deletePost(post.id)" class="text-slate-300 hover:text-red-500 p-2 transition-colors opacity-0 group-hover:opacity-100">
-                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                      </button>
-                    </div>
-                }
-              </div>
-          } @else {
-              <div class="p-12 text-center">
-                <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center text-slate-300 mx-auto mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+      <!-- Quick Suggested -->
+      <div class="px-8 pt-4 pb-2">
+         <h2 class="text-base font-bold text-gray-800 mb-4">Suggested</h2>
+         
+         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Create Post Card -->
+            <button (click)="store.navigateTo('WRITE')" class="bg-[#F8FAFC] p-4 rounded-xl border border-gray-200 text-left hover:bg-gray-50 transition-colors flex flex-col gap-2 group h-32 justify-between">
+                <div class="p-2 bg-blue-100 text-blue-600 w-fit rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                 </div>
-                <h4 class="text-slate-900 font-bold mb-1">Your queue is empty</h4>
-                <p class="text-slate-500 text-sm mb-4">Schedule your first post to see it here.</p>
-                <button (click)="store.currentView.set('WRITE')" class="bg-slate-900 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-slate-800 transition-colors">
-                    Create Post
-                </button>
-              </div>
-          }
-        </div>
+                <span class="font-medium text-gray-700 text-sm">New Text Post</span>
+            </button>
 
-        <!-- Right Side: Drafts Mini -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-           <h3 class="font-bold text-slate-900 text-lg mb-4">Recent Drafts</h3>
-           @if (store.drafts().length > 0) {
-              <div class="space-y-3">
-                 @for (draft of store.drafts(); track draft.id) {
-                    <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 hover:bg-blue-50 hover:border-blue-100 transition-colors cursor-pointer">
-                       <div class="flex justify-between items-start mb-1">
-                          <span class="text-[10px] font-bold uppercase text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">{{ draft.type }}</span>
-                          <span class="text-[10px] text-slate-400">Just now</span>
-                       </div>
-                       <div class="text-sm font-medium text-slate-700 line-clamp-2">
-                          {{ draft.content || draft.slides?.[0]?.title || 'Untitled Draft' }}
-                       </div>
-                    </div>
-                 }
-              </div>
-           } @else {
-              <div class="text-center py-8 text-slate-400 text-sm">
-                 No drafts yet.
-              </div>
-           }
-        </div>
+            <!-- Create Carousel Card -->
+            <button (click)="store.navigateTo('CAROUSEL')" class="bg-[#F8FAFC] p-4 rounded-xl border border-gray-200 text-left hover:bg-gray-50 transition-colors flex flex-col gap-2 group h-32 justify-between">
+                <div class="p-2 bg-purple-100 text-purple-600 w-fit rounded-lg group-hover:bg-purple-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <span class="font-medium text-gray-700 text-sm">New Carousel</span>
+            </button>
+            
+            <!-- Ideas -->
+            <button (click)="store.navigateTo('VIRAL')" class="bg-[#F8FAFC] p-4 rounded-xl border border-gray-200 text-left hover:bg-gray-50 transition-colors flex flex-col gap-2 group h-32 justify-between">
+                <div class="p-2 bg-green-100 text-green-600 w-fit rounded-lg group-hover:bg-green-200 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                </div>
+                <span class="font-medium text-gray-700 text-sm">Get Ideas</span>
+            </button>
+         </div>
+      </div>
+
+      <!-- Recent Files Table Structure -->
+      <div class="px-8 mt-8 flex-1 flex flex-col overflow-hidden">
+         <h2 class="text-base font-bold text-gray-800 mb-4">Recent for {{ store.activeProfile().name }}</h2>
+
+         <!-- File List Header -->
+         <div class="px-4 py-2 grid grid-cols-12 gap-4 text-sm font-medium text-gray-500 border-b border-gray-200">
+             <div class="col-span-6 pl-2">Name</div>
+             <div class="col-span-3">Owner</div>
+             <div class="col-span-3 text-right pr-4">Last modified</div>
+         </div>
+         
+         <div class="flex-1 overflow-y-auto custom-scrollbar">
+            @if (store.filteredPosts().length === 0) {
+               <div class="py-12 text-center">
+                   <p class="text-sm text-gray-400 italic">No recent activity for this profile.</p>
+               </div>
+            }
+
+            @for (post of store.filteredPosts().slice(0, 5); track post.id) {
+               <div (click)="editPost(post)" class="group grid grid-cols-12 gap-4 items-center px-4 py-3 hover:bg-[#F0F4F9] cursor-pointer border-b border-gray-100 transition-colors">
+                 
+                 <!-- Name -->
+                 <div class="col-span-6 flex items-center gap-3 pl-2 overflow-hidden">
+                    @if (post.type === 'text') {
+                      <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                   } @else {
+                      <svg class="w-5 h-5 text-purple-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
+                   }
+                   <span class="text-sm font-medium text-gray-700 truncate">
+                      {{ post.content || post.slides?.[0]?.title || 'Untitled Draft' }}
+                   </span>
+                 </div>
+
+                 <!-- Owner -->
+                 <div class="col-span-3 text-sm text-gray-500 flex items-center gap-2">
+                   <img [src]="store.activeProfile().avatar" class="w-5 h-5 rounded-full object-cover">
+                   <span class="truncate">me</span>
+                 </div>
+
+                 <!-- Modified -->
+                 <div class="col-span-3 text-sm text-gray-500 text-right pr-4">
+                   {{ post.lastModified | date:'MMM d' }}
+                 </div>
+
+               </div>
+            }
+         </div>
       </div>
     </div>
   `,
   styles: [`
-    .animate-fade-in { animation: fadeIn 0.4s ease-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+     .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 3px; }
   `]
 })
 export class DashboardHomeComponent {
   store = inject(StoreService);
+  authService = inject(AuthService);
+
+  editPost(post: any) {
+      this.store.activeDraft.set(post);
+      if (post.type === 'carousel') {
+          this.store.navigateTo('CAROUSEL');
+      } else {
+          this.store.navigateTo('WRITE');
+      }
+  }
 }

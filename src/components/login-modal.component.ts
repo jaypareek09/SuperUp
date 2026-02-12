@@ -1,165 +1,180 @@
 
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ModalService } from '../services/modal.service';
 import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-login-modal',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   template: `
     <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <!-- Backdrop with Blur and Dark Blue Gradient -->
-      <div class="absolute inset-0 bg-[#0B1120]/60 backdrop-blur-md transition-opacity" (click)="close()"></div>
+      <!-- Backdrop with Blur -->
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity" (click)="close()"></div>
 
       <!-- Modal Content -->
-      <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-[900px] flex overflow-hidden animate-scale-in">
+      <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-[400px] overflow-hidden animate-scale-in border border-slate-100">
         
         <!-- Close Button -->
-        <button (click)="close()" class="absolute top-4 right-4 z-10 p-2 text-slate-400 hover:text-slate-600 transition-colors">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <button (click)="close()" class="absolute top-4 right-4 z-10 p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-50">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
 
-        <!-- Left Side: Login Form -->
-        <div class="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center text-center">
+        <div class="p-8 pt-10">
           
-          <div class="flex flex-col items-center mb-8">
-             <div class="w-10 h-10 bg-[#0F172A] rounded-lg flex items-center justify-center text-white mb-4 shadow-lg shadow-blue-900/20">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-            </div>
-            <h2 class="text-3xl font-bold text-[#0F172A]">Welcome!</h2>
-            <p class="text-slate-500 mt-2 text-sm">We'll sign you in or create an account if you don't have one yet.</p>
+          <div class="flex flex-col items-center mb-6">
+            <img src="https://raw.githubusercontent.com/jaypareek09/jay/f8f0e8a4249db057b6d86eb42a6139b6abaa8287/POSTROCKET%20-%20LOGO.png" class="h-10 w-auto mb-4">
+            <h2 class="text-xl font-bold text-[#0F172A] tracking-tight">Welcome to PostRocket</h2>
+            <p class="text-slate-500 mt-2 text-sm text-center">Sign in to sync your LinkedIn drafts.</p>
           </div>
 
-          <button (click)="login()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-[#0F172A] font-medium py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition-all mb-6 group">
-            <svg class="w-5 h-5" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-            <span class="group-hover:text-blue-700 transition-colors">Continue with Google</span>
+          <!-- STATUS BADGE -->
+          @if (!authService.isConfigured()) {
+             <div class="bg-orange-50 border border-orange-100 rounded-lg p-3 mb-6 text-center">
+                <p class="text-[10px] font-bold text-orange-800 uppercase tracking-wide mb-1">⚠️ Demo Mode Active</p>
+                <p class="text-xs text-orange-700 leading-snug">
+                   Login is simulated. To enable real Google Auth, update keys in <code>src/services/auth.service.ts</code>.
+                </p>
+             </div>
+          }
+
+          <!-- REAL GOOGLE AUTH -->
+          <button (click)="loginWithGoogle()" [disabled]="isLoading()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-[#0F172A] font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-3 transition-all mb-4 group relative overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed h-12">
+            @if (isLoading() && !email) {
+                <svg class="animate-spin h-5 w-5 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            } @else {
+                <svg class="w-5 h-5 relative z-10" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <span class="relative z-10">Continue with Google</span>
+            }
           </button>
 
-          <div class="relative mb-6">
+          <div class="relative mb-4">
             <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-100"></div></div>
-            <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-slate-400">or</span></div>
+            <div class="relative flex justify-center text-xs"><span class="px-3 bg-white text-slate-400 font-medium">or email</span></div>
           </div>
 
-          <div class="space-y-4">
-             <div class="text-left">
-               <label class="block text-xs font-semibold text-slate-500 mb-1 ml-1">Email address</label>
-               <input type="email" placeholder="you@example.com" class="w-full bg-slate-50 border border-slate-200 text-[#0F172A] text-sm rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 block px-4 py-3 outline-none transition-all">
-             </div>
-             
-             <button class="w-full bg-slate-50 text-slate-300 font-semibold py-3 px-4 rounded-xl cursor-not-allowed" disabled>
-               Continue with email
-             </button>
-          </div>
+          <!-- EMAIL MAGIC LINK FORM -->
+          @if (!emailSent()) {
+            <div class="space-y-3">
+               <div>
+                 <input 
+                    type="email" 
+                    [(ngModel)]="email" 
+                    placeholder="name@company.com" 
+                    class="w-full bg-slate-50 border border-slate-200 text-[#0F172A] text-sm rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 block px-4 py-2.5 outline-none transition-all placeholder:text-slate-400"
+                    [disabled]="isLoading()"
+                    (keyup.enter)="loginWithEmail()"
+                 >
+               </div>
+               
+               <button 
+                  (click)="loginWithEmail()" 
+                  [disabled]="isLoading() || !email"
+                  class="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+               >
+                 @if (isLoading() && email) {
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                 } @else {
+                   <span>Send Magic Link</span>
+                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                 }
+               </button>
+               
+               @if (errorMessage()) {
+                   <p class="text-xs text-red-500 font-medium text-center">{{ errorMessage() }}</p>
+               }
+            </div>
+          } @else {
+            <!-- SUCCESS STATE -->
+            <div class="bg-green-50 rounded-xl p-6 border border-green-100 animate-scale-in text-center">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-3">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="font-bold text-green-900 text-sm mb-1">Check your inbox</h3>
+                <p class="text-xs text-green-800 leading-relaxed mb-3">
+                   Link sent to <b>{{ email }}</b>
+                </p>
+                <button (click)="emailSent.set(false)" class="text-xs font-bold text-green-700 hover:underline">Try different email</button>
+            </div>
+          }
 
-          <p class="mt-8 text-xs text-slate-400 leading-relaxed max-w-xs mx-auto">
-            By continuing you agree to the <a href="#" class="underline hover:text-slate-600">Terms of use</a> and <a href="#" class="underline hover:text-slate-600">Privacy policy</a>.
+          <p class="mt-6 text-[10px] text-slate-400 leading-relaxed text-center">
+            By continuing you agree to our Terms and Privacy Policy.
           </p>
-        </div>
 
-        <!-- Right Side: Social Proof (Hidden on mobile) -->
-        <div class="hidden md:flex w-1/2 bg-[#FAFAFA] border-l border-slate-100 flex-col p-10">
-          <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6 text-center">Trusted by top creators</h3>
-          
-          <div class="space-y-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">
-            
-            <!-- Creator Card 1 -->
-            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
-               <img src="https://picsum.photos/50/50?random=10" class="w-10 h-10 rounded-full object-cover">
-               <div class="flex-1 min-w-0">
-                  <div class="text-sm font-bold text-[#0F172A]">Justin Welsh</div>
-                  <div class="text-xs text-slate-500 truncate">Solopreneur</div>
-               </div>
-               <div class="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
-                 <svg class="w-3 h-3 text-[#0077B5]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                 <span class="text-xs font-bold text-slate-700">544k</span>
-               </div>
-            </div>
-
-            <!-- Creator Card 2 -->
-            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
-               <img src="https://picsum.photos/50/50?random=11" class="w-10 h-10 rounded-full object-cover">
-               <div class="flex-1 min-w-0">
-                  <div class="text-sm font-bold text-[#0F172A]">Matt Gray</div>
-                  <div class="text-xs text-slate-500 truncate">Founder Systems</div>
-               </div>
-               <div class="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
-                 <svg class="w-3 h-3 text-[#0077B5]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                 <span class="text-xs font-bold text-slate-700">505k</span>
-               </div>
-            </div>
-
-            <!-- Creator Card 3 -->
-            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
-               <img src="https://picsum.photos/50/50?random=12" class="w-10 h-10 rounded-full object-cover">
-               <div class="flex-1 min-w-0">
-                  <div class="text-sm font-bold text-[#0F172A]">Chase Dimond</div>
-                  <div class="text-xs text-slate-500 truncate">Email Marketing</div>
-               </div>
-               <div class="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
-                 <svg class="w-3 h-3 text-[#0077B5]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                 <span class="text-xs font-bold text-slate-700">291k</span>
-               </div>
-            </div>
-
-             <!-- Creator Card 4 -->
-            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
-               <img src="https://picsum.photos/50/50?random=13" class="w-10 h-10 rounded-full object-cover">
-               <div class="flex-1 min-w-0">
-                  <div class="text-sm font-bold text-[#0F172A]">Lara Acosta</div>
-                  <div class="text-xs text-slate-500 truncate">Personal Branding</div>
-               </div>
-               <div class="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
-                 <svg class="w-3 h-3 text-[#0077B5]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                 <span class="text-xs font-bold text-slate-700">133k</span>
-               </div>
-            </div>
-
-             <!-- Creator Card 5 -->
-            <div class="bg-white p-3 rounded-xl border border-slate-100 shadow-sm flex items-center gap-3">
-               <img src="https://picsum.photos/50/50?random=14" class="w-10 h-10 rounded-full object-cover">
-               <div class="flex-1 min-w-0">
-                  <div class="text-sm font-bold text-[#0F172A]">Kevin Moënne</div>
-                  <div class="text-xs text-slate-500 truncate">Head of Product</div>
-               </div>
-               <div class="flex items-center gap-1 bg-blue-50 px-2 py-1 rounded-md">
-                 <svg class="w-3 h-3 text-[#0077B5]" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                 <span class="text-xs font-bold text-slate-700">75k</span>
-               </div>
-            </div>
+          <!-- PHASE 3 HELPER -->
+          <div class="mt-4 pt-4 border-t border-slate-100">
+             <div class="bg-slate-50 border border-slate-200 rounded p-2 text-center">
+                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Phase 3 Configuration</p>
+                <p class="text-[10px] text-slate-500 mb-1">Whitelist this URL in Supabase:</p>
+                <code class="block bg-white border border-slate-200 rounded px-1 py-1 text-[10px] text-blue-600 break-all select-all cursor-pointer font-mono" title="Click to copy" (click)="copyUrl()">
+                   {{ currentUrl }}
+                </code>
+             </div>
           </div>
+
         </div>
       </div>
     </div>
   `,
   styles: [`
     .animate-scale-in {
-      animation: scaleIn 0.2s ease-out forwards;
+      animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
     @keyframes scaleIn {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #E2E8F0;
-      border-radius: 4px;
+      from { opacity: 0; transform: scale(0.98) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
     }
   `]
 })
 export class LoginModalComponent {
   modalService = inject(ModalService);
   authService = inject(AuthService);
+  
+  email = '';
+  isLoading = signal(false);
+  emailSent = signal(false);
+  errorMessage = signal('');
+  currentUrl = window.location.origin;
 
   close() {
     this.modalService.close();
   }
   
-  login() {
-    this.authService.login();
-    this.modalService.close();
+  async loginWithGoogle() {
+    this.isLoading.set(true);
+    try {
+        await this.authService.signInWithGoogle();
+        // Redirect handled by Supabase, or if demo, store updates instantly
+    } catch (err: any) {
+        this.errorMessage.set(err.message || 'Failed to connect to Google.');
+        this.isLoading.set(false);
+    }
+  }
+
+  async loginWithEmail() {
+    if (!this.email) return;
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    try {
+        await this.authService.signInWithEmail(this.email);
+        this.emailSent.set(true);
+        this.isLoading.set(false);
+    } catch (err: any) {
+        this.errorMessage.set(err.message || 'Failed to send magic link.');
+        this.isLoading.set(false);
+    }
+  }
+
+  copyUrl() {
+     navigator.clipboard.writeText(this.currentUrl).then(() => {
+        alert('URL copied to clipboard! Add this to Supabase Redirect URLs.');
+     });
   }
 }

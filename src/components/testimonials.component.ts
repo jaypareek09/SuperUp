@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   template: `
     <section class="py-24 bg-[#F8FAFC] overflow-hidden">
       <div class="max-w-7xl mx-auto px-6 mb-16 text-center reveal">
-        <h2 class="text-3xl font-bold tracking-tight text-[#0F172A]">Trusted by 10,000+ creators</h2>
+        <h2 class="text-3xl font-bold tracking-tight text-[#0F172A]">What people are saying</h2>
         <p class="text-slate-500 mt-4">Join the top 1% of LinkedIn voices.</p>
       </div>
 
@@ -31,7 +31,7 @@ import { CommonModule } from '@angular/common';
                   </div>
                </div>
                <p class="text-slate-600 text-[15px] leading-relaxed">
-                 "I used to spend 5 hours a week writing LinkedIn posts. With SuperUp, I spend 30 minutes. The ROI has been insane. 🚀"
+                 "I used to spend 5 hours a week writing LinkedIn posts. With PostRocket, I spend 30 minutes. The ROI has been insane. 🚀"
                </p>
                <div class="text-xs text-slate-400 font-medium pt-2">Posted 2 days ago</div>
             </div>
