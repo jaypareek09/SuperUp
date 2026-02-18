@@ -2,9 +2,11 @@
 import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../services/modal.service';
+import { NavigationService } from '../services/navigation.service';
 
 @Component({
   selector: 'app-hero',
+  standalone: true,
   imports: [CommonModule],
   template: `
     <section class="relative pt-32 pb-20 md:pt-40 md:pb-32 px-6 overflow-hidden bg-white selection:bg-[#0065FF] selection:text-white">
@@ -42,9 +44,13 @@ import { ModalService } from '../services/modal.service';
 
             <!-- CTA Buttons -->
             <div class="animate-fade-in stagger-3 flex flex-col sm:flex-row items-center gap-4">
-              <button (click)="modalService.open()" class="h-14 px-8 md:h-16 md:px-10 rounded-2xl bg-[#0065FF] text-white font-bold text-base md:text-lg hover:bg-[#0052CC] hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all flex items-center gap-3 group">
-                Start for free
+              <button (click)="modalService.open()" class="h-14 px-8 md:h-16 md:px-10 rounded-2xl bg-[#0065FF] text-white font-bold text-base md:text-lg hover:bg-[#0052CC] hover:shadow-xl hover:shadow-blue-500/30 hover:-translate-y-1 transition-all flex items-center gap-3 group border-4 border-transparent hover:border-blue-600/30">
+                Get Started
                 <svg class="w-5 h-5 opacity-70 group-hover:opacity-100 group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+              </button>
+              <button (click)="navigationService.navigateTo('demo')" class="h-14 px-8 md:h-16 md:px-10 rounded-2xl bg-white text-slate-700 font-bold text-base md:text-lg hover:bg-slate-50 hover:text-slate-900 hover:-translate-y-1 transition-all border border-slate-200 hover:border-slate-300 shadow-sm flex items-center gap-3 group">
+                <svg class="w-5 h-5 text-slate-500 group-hover:text-slate-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                See Demo
               </button>
             </div>
         </div>
@@ -78,6 +84,7 @@ import { ModalService } from '../services/modal.service';
 })
 export class HeroComponent implements OnInit, OnDestroy {
   modalService = inject(ModalService);
+  navigationService = inject(NavigationService);
   
   // Typing Animation State
   words = ['effortlessly.', 'easily.', 'smarter.', 'faster.', 'automatically.'];

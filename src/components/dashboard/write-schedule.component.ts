@@ -13,39 +13,54 @@ import { AuthService } from '../../services/auth.service';
   template: `
     <div class="flex flex-col gap-6 animate-fade-in font-sans relative pb-20 h-full">
       
-      <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
+      <!-- Top Bar with Post Title (if exists) -->
+      @if (store.activeDraft()?.title) {
+         <div class="flex items-center gap-2 text-sm text-slate-400 mb-2 px-1">
+            <span class="font-medium text-slate-800">{{ store.activeDraft()?.title }}</span>
+            <span>•</span>
+            <span>Draft</span>
+         </div>
+      }
+
+      <div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-10rem)]">
         <!-- MAIN EDITOR COLUMN -->
-        <div class="flex-1 flex flex-col bg-white rounded-xl border border-[#EAEAEA] shadow-sm overflow-hidden relative">
+        <div class="flex-1 flex flex-col bg-white rounded-2xl border border-[#EAEAEA] shadow-sm overflow-hidden relative group">
           
-          <!-- Top Bar: Formatting & AI -->
-          <div class="h-14 border-b border-[#EAEAEA] flex items-center justify-between px-4 bg-white shrink-0 z-20">
-              <!-- Formatting Tools (Unicode) -->
+          <!-- Top Toolbar -->
+          <div class="h-16 border-b border-[#EAEAEA] flex items-center justify-between px-6 bg-white shrink-0 z-20">
+              <!-- Formatting Tools -->
               <div class="flex items-center gap-1">
-                 <button (click)="applyFormat('bold')" class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-600 font-serif font-bold text-lg" title="Bold (Unicode)">B</button>
-                 <button (click)="applyFormat('italic')" class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-600 font-serif italic text-lg" title="Italic (Unicode)">I</button>
-                 <div class="w-px h-5 bg-slate-200 mx-2"></div>
-                 <button (click)="insertEmoji()" class="w-8 h-8 flex items-center justify-center rounded hover:bg-slate-100 text-slate-600" title="Insert Emoji">😀</button>
+                 <button (click)="applyFormat('bold')" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-900 font-serif font-bold text-lg transition-colors" title="Bold">B</button>
+                 <button (click)="applyFormat('italic')" class="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-900 font-serif italic text-lg transition-colors" title="Italic">I</button>
               </div>
 
-              <!-- AI Assistant -->
-              <div class="flex items-center gap-2">
-                 <div class="relative group">
+              <!-- AI COMMAND CENTER (Redesigned) -->
+              <div class="flex-1 max-w-lg mx-6">
+                 <div class="relative group/ai">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                       <svg class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
                     <input 
                       [(ngModel)]="aiTopic" 
                       (keyup.enter)="magicWrite()"
                       [disabled]="isAiLoading()"
-                      class="bg-slate-50 border border-slate-200 rounded-lg pl-3 pr-10 py-1.5 text-sm w-64 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-400"
+                      class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl pl-10 pr-10 py-2.5 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all placeholder:text-slate-400 font-medium"
                       placeholder="Ask AI to write about..."
                     >
                     <button 
                       (click)="magicWrite()"
                       [disabled]="isAiLoading() || !aiTopic"
-                      class="absolute right-1 top-1 bottom-1 px-2 bg-white rounded-md text-slate-500 hover:text-blue-600 disabled:opacity-50 transition-colors"
+                      class="absolute right-2 top-1.5 bottom-1.5 px-2 bg-white rounded-lg text-slate-400 hover:text-blue-600 disabled:opacity-0 transition-all shadow-sm border border-slate-100 flex items-center"
                     >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
                  </div>
               </div>
+
+              <!-- Character Count -->
+               <div class="text-xs font-bold text-slate-400 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+                  {{ content.length }} / 3000
+               </div>
           </div>
 
           <!-- Editor Area -->
@@ -53,45 +68,49 @@ import { AuthService } from '../../services/auth.service';
                 <textarea 
                     #editor
                     [(ngModel)]="content"
-                    class="flex-1 w-full p-8 outline-none resize-none text-[#1C1C1C] text-lg leading-relaxed placeholder-[#DCDCDC] custom-scrollbar bg-white font-sans"
+                    class="flex-1 w-full p-8 outline-none resize-none text-[#1C1C1C] text-lg leading-relaxed placeholder-[#DCDCDC] custom-scrollbar bg-white font-sans selection:bg-blue-100 selection:text-blue-900"
                     placeholder="Start writing your post here..."
                 ></textarea>
 
-                <!-- Floating Helper Buttons (Bottom Right of Textarea) -->
-                <div class="absolute bottom-4 right-6 flex gap-2">
-                    <button (click)="generateHooks()" class="bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-full text-xs font-bold text-slate-600 hover:text-blue-600 hover:border-blue-200 transition-all flex items-center gap-1">
-                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                       Generate Hooks
-                    </button>
-                    <button (click)="fixGrammar()" class="bg-white border border-slate-200 shadow-sm px-3 py-1.5 rounded-full text-xs font-bold text-slate-600 hover:text-green-600 hover:border-green-200 transition-all flex items-center gap-1">
-                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                       Fix Grammar
-                    </button>
-                </div>
+                <!-- Floating Helper Tools (Redesigned) -->
+                <div class="absolute bottom-6 left-6 right-6 flex justify-between items-end pointer-events-none">
+                    
+                    <div class="flex gap-3 pointer-events-auto">
+                        <button (click)="generateHooks()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 shadow-lg shadow-slate-200/50 rounded-full text-xs font-bold text-slate-600 hover:text-blue-600 hover:border-blue-300 hover:-translate-y-1 transition-all group">
+                           <span class="w-6 h-6 rounded-full bg-blue-50 text-blue-500 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                           </span>
+                           Generate Hooks
+                        </button>
+                        
+                        <button (click)="fixGrammar()" class="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 shadow-lg shadow-slate-200/50 rounded-full text-xs font-bold text-slate-600 hover:text-green-600 hover:border-green-300 hover:-translate-y-1 transition-all group">
+                           <span class="w-6 h-6 rounded-full bg-green-50 text-green-500 flex items-center justify-center group-hover:bg-green-100 transition-colors">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                           </span>
+                           Fix Grammar
+                        </button>
+                    </div>
 
-                <!-- Footer Stats -->
-                <div class="h-10 border-t border-slate-100 flex items-center justify-between px-6 bg-slate-50/50 text-xs text-slate-500">
-                    <div>{{ content.length }} chars • ~{{ (content.split(' ').length / 200).toFixed(1) }} min read</div>
-                    <div class="flex items-center gap-2">
-                       <span class="w-2 h-2 rounded-full" [class.bg-green-500]="content.length > 0" [class.bg-slate-300]="content.length === 0"></span>
-                       {{ content.length > 0 ? 'Drafting' : 'Empty' }}
+                    <div class="text-xs text-slate-300 font-bold bg-white/80 backdrop-blur px-2 py-1 rounded">
+                       ~{{ (content.split(' ').length / 200).toFixed(1) }} min read
                     </div>
                 </div>
 
                 <!-- Hook Suggestions Overlay -->
                 @if (hooks().length > 0) {
-                    <div class="absolute inset-x-0 bottom-10 z-30 p-4 bg-gradient-to-t from-white via-white to-transparent pt-10">
-                      <div class="bg-white rounded-xl shadow-2xl border border-blue-100 overflow-hidden animate-slide-up max-w-2xl mx-auto ring-4 ring-blue-50">
-                          <div class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
+                    <div class="absolute inset-x-0 bottom-0 z-30 p-6 bg-gradient-to-t from-white via-white to-transparent pt-20">
+                      <div class="bg-white rounded-2xl shadow-2xl border border-blue-100 overflow-hidden animate-slide-up max-w-2xl mx-auto ring-4 ring-blue-50/50">
+                          <div class="bg-blue-50/80 px-4 py-3 border-b border-blue-100 flex justify-between items-center backdrop-blur-sm">
                             <span class="text-xs font-bold text-blue-700 uppercase flex items-center gap-2">
                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                                Select a Viral Hook
                             </span>
-                            <button (click)="hooks.set([])" class="text-blue-400 hover:text-blue-700 font-bold">&times;</button>
+                            <button (click)="hooks.set([])" class="text-blue-400 hover:text-blue-700 font-bold p-1 hover:bg-blue-100 rounded-md transition-colors">&times;</button>
                           </div>
-                          <div class="divide-y divide-slate-100 max-h-60 overflow-y-auto">
+                          <div class="divide-y divide-slate-50 max-h-60 overflow-y-auto">
                             @for (hook of hooks(); track $index) {
-                                <button (click)="applyHook(hook)" class="w-full text-left p-4 hover:bg-blue-50 text-slate-800 text-sm transition-colors block font-medium leading-relaxed">
+                                <button (click)="applyHook(hook)" class="w-full text-left p-4 hover:bg-blue-50 text-slate-800 text-sm transition-colors block font-medium leading-relaxed group">
+                                  <span class="text-blue-500 opacity-0 group-hover:opacity-100 mr-2 transition-opacity font-bold">→</span>
                                   {{ hook }}
                                 </button>
                             }
@@ -105,12 +124,12 @@ import { AuthService } from '../../services/auth.service';
         <!-- PREVIEW COLUMN -->
         <div class="w-full lg:w-[400px] flex flex-col animate-fade-in stagger-1 shrink-0">
           <!-- Preview Toggle -->
-          <div class="bg-slate-100 p-1 rounded-lg flex mb-4 self-center border border-slate-200">
-             <button (click)="previewMode.set('mobile')" [class.bg-white]="previewMode() === 'mobile'" [class.shadow-sm]="previewMode() === 'mobile'" [class.text-slate-800]="previewMode() === 'mobile'" class="px-4 py-1.5 rounded-md text-xs font-bold text-slate-500 transition-all flex items-center gap-2">
+          <div class="bg-slate-100 p-1 rounded-xl flex mb-4 self-center border border-slate-200">
+             <button (click)="previewMode.set('mobile')" [class.bg-white]="previewMode() === 'mobile'" [class.shadow-sm]="previewMode() === 'mobile'" [class.text-slate-800]="previewMode() === 'mobile'" class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition-all flex items-center gap-2">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
                 Mobile
              </button>
-             <button (click)="previewMode.set('desktop')" [class.bg-white]="previewMode() === 'desktop'" [class.shadow-sm]="previewMode() === 'desktop'" [class.text-slate-800]="previewMode() === 'desktop'" class="px-4 py-1.5 rounded-md text-xs font-bold text-slate-500 transition-all flex items-center gap-2">
+             <button (click)="previewMode.set('desktop')" [class.bg-white]="previewMode() === 'desktop'" [class.shadow-sm]="previewMode() === 'desktop'" [class.text-slate-800]="previewMode() === 'desktop'" class="px-4 py-1.5 rounded-lg text-xs font-bold text-slate-500 transition-all flex items-center gap-2">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                 Desktop
              </button>
@@ -120,7 +139,7 @@ import { AuthService } from '../../services/auth.service';
           <div class="flex-1 relative overflow-hidden flex justify-center">
               <div 
                  class="bg-white border border-slate-300 shadow-xl overflow-hidden flex flex-col transition-all duration-300 relative"
-                 [class.rounded-[2rem]]="previewMode() === 'mobile'"
+                 [class.rounded-[2.5rem]]="previewMode() === 'mobile'"
                  [class.w-[320px]]="previewMode() === 'mobile'"
                  [class.h-[650px]]="previewMode() === 'mobile'"
                  [class.rounded-xl]="previewMode() === 'desktop'"
@@ -129,13 +148,13 @@ import { AuthService } from '../../services/auth.service';
               >
                   <!-- Mobile Notch (Visual Only) -->
                   @if (previewMode() === 'mobile') {
-                     <div class="absolute top-0 left-0 right-0 h-7 bg-slate-100 border-b border-slate-200 z-10 flex justify-center">
-                        <div class="w-20 h-4 bg-black rounded-b-xl"></div>
+                     <div class="absolute top-0 left-0 right-0 h-8 bg-slate-50/80 backdrop-blur-sm border-b border-slate-200 z-10 flex justify-center items-end pb-1.5">
+                        <div class="w-24 h-4 bg-black rounded-full absolute top-2"></div>
                      </div>
                   }
 
                   <!-- LinkedIn Post Header -->
-                  <div class="p-4 pt-10 pb-0" [class.pt-4]="previewMode() === 'desktop'">
+                  <div class="p-4 pb-0" [class.pt-12]="previewMode() === 'mobile'" [class.pt-4]="previewMode() === 'desktop'">
                       <div class="flex gap-3 mb-3">
                         <img [src]="'https://picsum.photos/seed/' + (authService.currentUser()?.name?.replace(' ', '') || 'user') + '/100/100'" class="w-10 h-10 rounded-full border border-slate-100">
                         <div>
@@ -190,9 +209,9 @@ import { AuthService } from '../../services/auth.service';
           </div>
           
           <!-- Scheduling Actions (Below Preview) -->
-           <div class="mt-4 bg-white rounded-xl border border-slate-200 p-4 shadow-sm flex flex-col gap-3">
-              <button (click)="saveDraft()" class="w-full py-2.5 text-slate-700 font-bold text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">Save Draft</button>
-              <button (click)="scheduleUnderDev()" class="w-full py-2.5 text-white font-bold text-sm bg-[#0065FF] hover:bg-[#0052CC] rounded-lg transition-colors shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2">
+           <div class="mt-4 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col gap-3">
+              <button (click)="saveDraft()" class="w-full py-3 text-slate-700 font-bold text-sm bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Save Changes</button>
+              <button (click)="scheduleUnderDev()" class="w-full py-3 text-white font-bold text-sm bg-[#0065FF] hover:bg-[#0052CC] rounded-xl transition-colors shadow-lg shadow-blue-500/10 flex items-center justify-center gap-2 transform active:scale-95">
                  Schedule Post
                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
               </button>
@@ -271,14 +290,6 @@ export class WriteScheduleComponent {
     });
   }
 
-  insertEmoji() {
-     const textarea = this.editor.nativeElement;
-     const start = textarea.selectionStart;
-     const text = this.content;
-     const emoji = "✨"; // Placeholder for emoji picker logic
-     this.content = text.substring(0, start) + emoji + text.substring(start);
-  }
-
   // --- AI LOGIC ---
   async magicWrite() {
     if (!this.aiTopic) return;
@@ -318,12 +329,24 @@ export class WriteScheduleComponent {
   }
 
   saveDraft() {
-    if (!this.content) return;
-    this.store.saveDraft({ type: 'text', content: this.content });
-    this.store.triggerNotification('Success', 'Saved to Library');
+    // Save current content to active draft
+    const active = this.store.activeDraft();
+    if (active) {
+        // Update the existing draft in the array
+        this.store.posts.update(posts => posts.map(p => {
+            if (p.id === active.id) {
+                return { ...p, content: this.content, lastModified: new Date() };
+            }
+            return p;
+        }));
+    } else {
+        // Fallback if no active draft (legacy flow)
+        this.store.saveDraft({ type: 'text', content: this.content });
+    }
+    this.store.triggerNotification('Success', 'Changes saved.');
   }
 
   scheduleUnderDev() {
-     this.store.triggerNotification('Info', 'Scheduling feature is under development.');
+     this.store.navigateTo('SCHEDULE');
   }
 }

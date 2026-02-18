@@ -2,11 +2,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../services/modal.service';
+import { LogoComponent } from './logo.component';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LogoComponent],
   template: `
     <header class="fixed top-0 left-0 right-0 z-50">
       <div class="glass-nav transition-all duration-300">
@@ -14,13 +15,14 @@ import { ModalService } from '../services/modal.service';
           
           <!-- Logo (Left) -->
           <div class="flex items-center gap-3 cursor-pointer group z-20" (click)="scrollToTop()">
-            <img src="https://raw.githubusercontent.com/jaypareek09/jay/f8f0e8a4249db057b6d86eb42a6139b6abaa8287/POSTROCKET%20-%20LOGO.png" alt="PostRocket" class="h-10 w-auto">
+            <app-logo />
             <span class="font-bold text-xl tracking-tight text-slate-900">PostRocket</span>
           </div>
 
           <!-- Desktop Nav (Absolute Center) -->
           <div class="absolute inset-0 hidden md:flex items-center justify-center pointer-events-none">
             <nav class="pointer-events-auto flex items-center gap-8 text-[15px] font-medium text-slate-600 bg-white/50 px-6 py-2 rounded-full border border-slate-200/50 backdrop-blur-sm shadow-sm">
+              <a (click)="scrollTo('features')" class="cursor-pointer hover:text-[#0065FF] transition-colors">Features</a>
               <a (click)="scrollTo('how-it-works')" class="cursor-pointer hover:text-[#0065FF] transition-colors">How it works</a>
               <a (click)="scrollTo('pricing')" class="cursor-pointer hover:text-[#0065FF] transition-colors">Pricing</a>
               <a (click)="scrollTo('footer')" class="cursor-pointer hover:text-[#0065FF] transition-colors">Resources</a>

@@ -1,7 +1,7 @@
 
 import { Injectable, signal, computed } from '@angular/core';
 
-export type View = 'HOME' | 'WRITE' | 'SCHEDULE' | 'MY_POSTS' | 'CAROUSEL' | 'VIRAL' | 'ENGAGEMENT' | 'SETTINGS' | 'ANALYTICS';
+export type View = 'HOME' | 'WRITE' | 'SCHEDULE' | 'MY_POSTS' | 'CAROUSEL' | 'VIRAL' | 'SETTINGS' | 'ANALYTICS';
 export type OnboardingStep = 'IDLE' | 'INSTALL_PROMPT' | 'SCANNING' | 'CONFIRM_PROFILE' | 'COMPLETE';
 
 export interface LinkedProfile {
@@ -22,6 +22,7 @@ export interface Post {
   status: 'draft' | 'scheduled' | 'published';
   stats?: { views: number; likes: number; comments: number };
   lastModified?: Date;
+  title?: string; // NEW: Post name for library organization
 }
 
 export interface ViralPost {
@@ -60,16 +61,6 @@ export interface ProfileStats {
   engagementRate: number;
 }
 
-export interface AnalyzedPost {
-  id: string;
-  content: string;
-  date: string;
-  likes: number;
-  comments: number;
-  views: number;
-  engagement: number;
-}
-
 export interface ScrapedProfile {
     name: string;
     headline: string;
@@ -88,6 +79,9 @@ export class StoreService {
   activeDraft = signal<Post | null>(null); 
   isConnected = signal(false); 
   
+  // UI State
+  isNewPostModalOpen = signal(false);
+
   // Onboarding State
   onboardingStep = signal<OnboardingStep>('IDLE');
   detectedProfile = signal<ScrapedProfile | null>(null);
@@ -109,9 +103,8 @@ export class StoreService {
     postImpressions: 0,
     engagementRate: 0
   });
+  activeAnalyticsPost = signal<Post | null>(null);
 
-  // START EMPTY - No Demo Data
-  analyzedPosts = signal<AnalyzedPost[]>([]);
   posts = signal<Post[]>([]);
   commentsToReply = signal<Comment[]>([]);
   prospects = signal<Prospect[]>([]);
@@ -123,11 +116,102 @@ export class StoreService {
   // Filter posts based on active profile
   filteredPosts = computed(() => this.posts().filter(p => p.profileId === this.activeProfileId()));
 
-  scheduledPosts = computed(() => this.filteredPosts().filter(p => p.status === 'scheduled'));
+  scheduledPosts = computed(() => this.filteredPosts().filter(p => p.status === 'scheduled').sort((a, b) => (a.scheduledDate?.getTime() || 0) - (b.scheduledDate?.getTime() || 0)));
   drafts = computed(() => this.filteredPosts().filter(p => p.status === 'draft'));
 
   constructor() {
     this.requestNotificationPermission();
+    this._loadDemoData();
+  }
+
+  private _loadDemoData() {
+    // Check if data already exists to avoid overwriting
+    if (this.posts().length > 0) return;
+
+    this.profileStats.set({
+        followers: 1489,
+        profileViews: 972,
+        postImpressions: 48300,
+        engagementRate: 4.7
+    });
+
+    this.posts.set([
+      {
+        id: 'demo-post-1',
+        profileId: 'p1',
+        type: 'text',
+        title: 'Consistency Habit',
+        content: 'I spent 100 hours interviewing top creators. Here\'s the one habit they all share: consistency. They show up even when they don\'t feel like it.',
+        slides: [],
+        scheduledDate: new Date(new Date().setDate(new Date().getDate() - 2)),
+        status: 'published',
+        stats: { views: 18200, likes: 305, comments: 89 },
+        lastModified: new Date(new Date().setDate(new Date().getDate() - 2))
+      },
+      {
+        id: 'demo-post-4',
+        profileId: 'p1',
+        type: 'text',
+        title: 'Future of AI',
+        content: 'The future of AI is not just about intelligence, but about collaboration. Tools that work with you, not just for you...',
+        slides: [],
+        scheduledDate: new Date(new Date().setDate(new Date().getDate() - 5)),
+        status: 'published',
+        stats: { views: 8400, likes: 152, comments: 34 },
+        lastModified: new Date(new Date().setDate(new Date().getDate() - 5))
+      },
+      {
+        id: 'demo-post-5',
+        profileId: 'p1',
+        type: 'carousel',
+        title: 'SaaS Mistakes',
+        content: 'Carousel: 5 mistakes to avoid when building a SaaS product. Mistake #1: Building without a distribution plan...',
+        slides: [{ title: 'Mistake #1', body: 'Building without a distribution plan.' }],
+        scheduledDate: new Date(new Date().setDate(new Date().getDate() - 7)),
+        status: 'published',
+        stats: { views: 12500, likes: 210, comments: 55 },
+        lastModified: new Date(new Date().setDate(new Date().getDate() - 7))
+      },
+      {
+        id: 'demo-post-6',
+        profileId: 'p1',
+        type: 'text',
+        title: 'Recycled Content Hot Take',
+        content: 'Hot take: Most "thought leadership" is just recycled content. Originality wins, always.',
+        slides: [],
+        scheduledDate: new Date(new Date().setDate(new Date().getDate() - 10)),
+        status: 'published',
+        stats: { views: 6100, likes: 98, comments: 61 },
+        lastModified: new Date(new Date().setDate(new Date().getDate() - 10))
+      },
+      {
+        id: 'demo-post-2',
+        profileId: 'p1',
+        type: 'text',
+        title: 'New Feature Sneak Peek',
+        content: 'Just wrapped up a new feature for PostRocket. Scheduling is about to get a major iOS-style upgrade. Sneak peek tomorrow!',
+        slides: [],
+        scheduledDate: new Date(new Date().setDate(new Date().getDate() + 1)),
+        status: 'scheduled',
+        stats: { views: 0, likes: 0, comments: 0 },
+        lastModified: new Date()
+      },
+      {
+        id: 'demo-post-3',
+        profileId: 'p1',
+        type: 'carousel',
+        title: 'SaaS Carousel Draft',
+        content: '5 mistakes to avoid when building a SaaS product.',
+        slides: [
+          { title: 'Mistake #1', body: 'Building without a distribution plan.' },
+          { title: 'Mistake #2', body: 'Ignoring customer feedback.' }
+        ],
+        scheduledDate: null,
+        status: 'draft',
+        stats: { views: 0, likes: 0, comments: 0 },
+        lastModified: new Date(new Date().setDate(new Date().getDate() - 1))
+      }
+    ]);
   }
 
   // --- Navigation Logic ---
@@ -139,7 +223,41 @@ export class StoreService {
     setTimeout(() => {
         this.currentView.set(view);
         this.isLoadingView.set(false);
-    }, 800); 
+    }, 500); // reduced transition time slightly
+  }
+
+  openNewPostModal() {
+     this.isNewPostModalOpen.set(true);
+  }
+
+  createNewPost(title: string, type: 'text' | 'carousel') {
+      const newPost: Post = {
+        id: Math.random().toString(36).substring(7),
+        profileId: this.activeProfileId(),
+        type: type,
+        title: title,
+        content: '',
+        slides: type === 'carousel' ? [{title: 'Slide 1', body: 'Start writing...'}] : [],
+        status: 'draft',
+        scheduledDate: null,
+        stats: { views: 0, likes: 0, comments: 0 },
+        lastModified: new Date()
+      };
+
+      // 1. Add to store
+      this.posts.update(p => [newPost, ...p]);
+      
+      // 2. Set as active
+      this.activeDraft.set(newPost);
+      
+      // 3. Navigate
+      if (type === 'carousel') {
+         this.navigateTo('CAROUSEL');
+      } else {
+         this.navigateTo('WRITE');
+      }
+      
+      this.triggerNotification('Draft Created', `"${title}" has been saved.`);
   }
 
   // --- Profile Logic ---
@@ -164,6 +282,22 @@ export class StoreService {
       };
       this.profiles.update(p => [...p, newProfile]);
       this.switchProfile(newProfile.id);
+  }
+
+  removeProfile(profileId: string) {
+      const profileToRemove = this.profiles().find(p => p.id === profileId);
+      if (!profileToRemove) return;
+
+      this.profiles.update(p => p.filter(profile => profile.id !== profileId));
+      
+      // If the removed profile was the active one, switch to the first available one
+      if (this.activeProfileId() === profileId) {
+          const firstProfile = this.profiles()[0];
+          if (firstProfile) {
+              this.activeProfileId.set(firstProfile.id);
+          }
+      }
+      this.triggerNotification('Account Removed', `Unlinked ${profileToRemove.name}.`);
   }
 
   // --- Onboarding Logic ---

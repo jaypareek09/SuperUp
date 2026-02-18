@@ -78,7 +78,7 @@ import { AuthService } from '../../services/auth.service';
                    }
                    
                    <span class="text-sm font-medium text-gray-700 truncate">
-                      {{ post.content || post.slides?.[0]?.title || 'Untitled Draft' }}
+                      {{ post.title || post.content || post.slides?.[0]?.title || 'Untitled Draft' }}
                    </span>
                </div>
 
@@ -104,7 +104,7 @@ export class MyPostsComponent {
   authService = inject(AuthService);
 
   createNew() {
-    this.store.currentView.set('WRITE');
+    this.store.openNewPostModal();
   }
 
   openPost(post: Post) {

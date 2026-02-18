@@ -30,6 +30,33 @@ import { AuthService } from '../../services/auth.service';
                 </div>
              </div>
           </div>
+          
+          <!-- Linked Accounts Section -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+              <h2 class="text-lg font-bold text-[#0F172A] mb-4">Linked Accounts</h2>
+              <div class="space-y-3 mb-6">
+                  @for (profile of store.profiles(); track profile.id) {
+                      <div class="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100">
+                          <div class="flex items-center gap-3">
+                              <img [src]="profile.avatar" class="w-10 h-10 rounded-full">
+                              <div>
+                                  <div class="font-bold text-slate-800 text-sm">{{ profile.name }}</div>
+                                  <div class="text-xs text-slate-500">{{ profile.handle }}</div>
+                              </div>
+                          </div>
+                          @if (store.profiles().length > 1) {
+                              <button (click)="removeAccount(profile.id)" class="text-xs font-medium text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors">
+                                  Remove
+                              </button>
+                          }
+                      </div>
+                  }
+              </div>
+              <button (click)="addAccount()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-lg transition-colors text-sm flex items-center justify-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                  Add another LinkedIn Account
+              </button>
+          </div>
 
           <!-- Preferences -->
           <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
@@ -77,4 +104,21 @@ import { AuthService } from '../../services/auth.service';
 })
 export class SettingsComponent {
   authService = inject(AuthService);
+  store = inject(StoreService);
+
+  addAccount() {
+    // Simulate adding a new account for the demo
+    const randomId = Math.floor(Math.random() * 1000);
+    const name = `Demo User ${randomId}`;
+    this.store.addProfile(name, `@demo${randomId}`);
+    this.store.triggerNotification('Account Added', `Successfully linked ${name}.`);
+  }
+
+  removeAccount(profileId: string) {
+    if (this.store.profiles().length <= 1) {
+        this.store.triggerNotification('Error', 'Cannot remove the last account.');
+        return;
+    }
+    this.store.removeProfile(profileId);
+  }
 }

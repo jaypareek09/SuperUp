@@ -9,113 +9,148 @@ import { AuthService } from '../../services/auth.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="h-full flex flex-col bg-white">
+    <div class="h-full flex flex-col bg-[#F8FAFC] overflow-y-auto custom-scrollbar">
        
-       <!-- Top Bar (Search) - Consistent with MyPosts -->
-      <div class="px-6 py-4 flex items-center justify-between">
-          <div class="relative w-full max-w-[720px]">
-             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-             </div>
-             <input 
-                type="text" 
-                placeholder="Search everything..." 
-                class="block w-full pl-10 pr-3 py-3 border-none rounded-full bg-[#E9EEF6] text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 focus:shadow-sm sm:text-sm transition-shadow"
-             >
+       <!-- Header Section with Greeting and Date -->
+       <div class="px-8 pt-8 pb-6">
+          <div class="flex justify-between items-end mb-8">
+              <div>
+                  <h1 class="text-2xl font-bold text-slate-900">Good {{ timeOfDay }}, {{ firstName }}</h1>
+                  <p class="text-slate-500 text-sm mt-1">Here's what's happening with your content today.</p>
+              </div>
+              <div class="text-right hidden sm:block">
+                  <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ currentDate | date:'EEEE, MMMM d' }}</p>
+              </div>
           </div>
-      </div>
 
-      <!-- Quick Suggested -->
-      <div class="px-8 pt-4 pb-2">
-         <h2 class="text-base font-bold text-gray-800 mb-4">Suggested</h2>
-         
-         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Create Post Card -->
-            <button (click)="store.navigateTo('WRITE')" class="bg-[#F8FAFC] p-4 rounded-xl border border-gray-200 text-left hover:bg-gray-50 transition-colors flex flex-col gap-2 group h-32 justify-between">
-                <div class="p-2 bg-blue-100 text-blue-600 w-fit rounded-lg group-hover:bg-blue-200 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          <!-- Quick Actions -->
+          <h2 class="text-base font-bold text-slate-800 mb-4">Create Content</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+             <!-- Modified Button to Open Modal -->
+             <button (click)="store.openNewPostModal()" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all group text-left">
+                <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </div>
-                <span class="font-medium text-gray-700 text-sm">New Text Post</span>
-            </button>
+                <div class="font-bold text-slate-900 text-sm">Write Post</div>
+                <div class="text-xs text-slate-500 mt-1">Draft & Schedule</div>
+             </button>
 
-            <!-- Create Carousel Card -->
-            <button (click)="store.navigateTo('CAROUSEL')" class="bg-[#F8FAFC] p-4 rounded-xl border border-gray-200 text-left hover:bg-gray-50 transition-colors flex flex-col gap-2 group h-32 justify-between">
-                <div class="p-2 bg-purple-100 text-purple-600 w-fit rounded-lg group-hover:bg-purple-200 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+             <button (click)="store.navigateTo('CAROUSEL')" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-purple-400 hover:shadow-md transition-all group text-left">
+                <div class="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 </div>
-                <span class="font-medium text-gray-700 text-sm">New Carousel</span>
-            </button>
-            
-            <!-- Ideas -->
-            <button (click)="store.navigateTo('VIRAL')" class="bg-[#F8FAFC] p-4 rounded-xl border border-gray-200 text-left hover:bg-gray-50 transition-colors flex flex-col gap-2 group h-32 justify-between">
-                <div class="p-2 bg-green-100 text-green-600 w-fit rounded-lg group-hover:bg-green-200 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                <div class="font-bold text-slate-900 text-sm">Carousel Maker</div>
+                <div class="text-xs text-slate-500 mt-1">PDF Slides</div>
+             </button>
+
+             <button (click)="store.navigateTo('VIRAL')" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-green-400 hover:shadow-md transition-all group text-left">
+                <div class="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                 </div>
-                <span class="font-medium text-gray-700 text-sm">Get Ideas</span>
-            </button>
-         </div>
-      </div>
+                <div class="font-bold text-slate-900 text-sm">Viral Ideas</div>
+                <div class="text-xs text-slate-500 mt-1">Get Inspired</div>
+             </button>
 
-      <!-- Recent Files Table Structure -->
-      <div class="px-8 mt-8 flex-1 flex flex-col overflow-hidden">
-         <h2 class="text-base font-bold text-gray-800 mb-4">Recent for {{ store.activeProfile().name }}</h2>
+             <button (click)="store.navigateTo('ANALYTICS')" class="bg-white p-4 rounded-xl border border-slate-200 hover:border-orange-400 hover:shadow-md transition-all group text-left">
+                <div class="w-10 h-10 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                </div>
+                <div class="font-bold text-slate-900 text-sm">Analytics</div>
+                <div class="text-xs text-slate-500 mt-1">Track Growth</div>
+             </button>
+          </div>
 
-         <!-- File List Header -->
-         <div class="px-4 py-2 grid grid-cols-12 gap-4 text-sm font-medium text-gray-500 border-b border-gray-200">
-             <div class="col-span-6 pl-2">Name</div>
-             <div class="col-span-3">Owner</div>
-             <div class="col-span-3 text-right pr-4">Last modified</div>
-         </div>
-         
-         <div class="flex-1 overflow-y-auto custom-scrollbar">
-            @if (store.filteredPosts().length === 0) {
-               <div class="py-12 text-center">
-                   <p class="text-sm text-gray-400 italic">No recent activity for this profile.</p>
-               </div>
-            }
-
-            @for (post of store.filteredPosts().slice(0, 5); track post.id) {
-               <div (click)="editPost(post)" class="group grid grid-cols-12 gap-4 items-center px-4 py-3 hover:bg-[#F0F4F9] cursor-pointer border-b border-gray-100 transition-colors">
-                 
-                 <!-- Name -->
-                 <div class="col-span-6 flex items-center gap-3 pl-2 overflow-hidden">
-                    @if (post.type === 'text') {
-                      <svg class="w-5 h-5 text-blue-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                   } @else {
-                      <svg class="w-5 h-5 text-purple-500 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9H9V9h10v2zm-4 4H9v-2h6v2zm4-8H9V5h10v2z"/></svg>
-                   }
-                   <span class="text-sm font-medium text-gray-700 truncate">
-                      {{ post.content || post.slides?.[0]?.title || 'Untitled Draft' }}
-                   </span>
-                 </div>
-
-                 <!-- Owner -->
-                 <div class="col-span-3 text-sm text-gray-500 flex items-center gap-2">
-                   <img [src]="store.activeProfile().avatar" class="w-5 h-5 rounded-full object-cover">
-                   <span class="truncate">me</span>
-                 </div>
-
-                 <!-- Modified -->
-                 <div class="col-span-3 text-sm text-gray-500 text-right pr-4">
-                   {{ post.lastModified | date:'MMM d' }}
-                 </div>
-
-               </div>
-            }
-         </div>
-      </div>
+          <!-- Recent Activity -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+              <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                  <h2 class="text-base font-bold text-slate-800">Recent Content</h2>
+                  <button (click)="store.navigateTo('MY_POSTS')" class="text-xs font-bold text-blue-600 hover:text-blue-700">View All</button>
+              </div>
+              
+              <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-100">
+                            <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Post Name</th>
+                            <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Modified</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-50">
+                        @if (store.filteredPosts().length === 0) {
+                            <tr>
+                                <td colspan="3" class="px-6 py-8 text-center text-sm text-slate-400 italic">
+                                    No posts yet. Start writing!
+                                </td>
+                            </tr>
+                        }
+                        @for (post of store.filteredPosts().slice(0, 5); track post.id) {
+                            <tr (click)="editPost(post)" class="hover:bg-blue-50/30 cursor-pointer transition-colors group">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" 
+                                             [class.bg-blue-100]="post.type === 'text'"
+                                             [class.text-blue-600]="post.type === 'text'"
+                                             [class.bg-purple-100]="post.type === 'carousel'"
+                                             [class.text-purple-600]="post.type === 'carousel'">
+                                            @if (post.type === 'text') {
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                                            } @else {
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                            }
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="font-medium text-slate-900 truncate max-w-xs group-hover:text-blue-600 transition-colors">
+                                                {{ post.title || post.content || 'Untitled Draft' }}
+                                            </div>
+                                            <div class="text-xs text-slate-500 capitalize">{{ post.type }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+                                          [class.bg-slate-100]="post.status === 'draft'"
+                                          [class.text-slate-800]="post.status === 'draft'"
+                                          [class.bg-blue-100]="post.status === 'scheduled'"
+                                          [class.text-blue-800]="post.status === 'scheduled'"
+                                          [class.bg-green-100]="post.status === 'published'"
+                                          [class.text-green-800]="post.status === 'published'">
+                                        {{ post.status }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right text-sm text-slate-500 font-mono">
+                                    {{ post.lastModified | date:'MMM d' }}
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+              </div>
+          </div>
+       </div>
     </div>
   `,
   styles: [`
      .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-     .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 3px; }
+     .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
   `]
 })
 export class DashboardHomeComponent {
   store = inject(StoreService);
   authService = inject(AuthService);
+  currentDate = new Date();
+
+  get timeOfDay(): string {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Morning';
+    if (hour < 18) return 'Afternoon';
+    return 'Evening';
+  }
+
+  get firstName(): string {
+      return this.store.activeProfile().name.split(' ')[0];
+  }
 
   editPost(post: any) {
       this.store.activeDraft.set(post);

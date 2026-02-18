@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalService } from '../services/modal.service';
 import { AuthService } from '../services/auth.service';
+import { LogoComponent } from './logo.component';
 
 @Component({
   selector: 'app-login-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, LogoComponent],
   template: `
     <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <!-- Backdrop with Blur -->
@@ -24,21 +25,11 @@ import { AuthService } from '../services/auth.service';
 
         <div class="p-8 pt-10">
           
-          <div class="flex flex-col items-center mb-6">
-            <img src="https://raw.githubusercontent.com/jaypareek09/jay/f8f0e8a4249db057b6d86eb42a6139b6abaa8287/POSTROCKET%20-%20LOGO.png" class="h-10 w-auto mb-4">
+          <div class="flex flex-col items-center mb-8">
+            <app-logo logoClass="h-10 w-auto mb-4" />
             <h2 class="text-xl font-bold text-[#0F172A] tracking-tight">Welcome to PostRocket</h2>
-            <p class="text-slate-500 mt-2 text-sm text-center">Sign in to sync your LinkedIn drafts.</p>
+            <p class="text-slate-500 mt-2 text-sm text-center">Sign in or create your account to continue.</p>
           </div>
-
-          <!-- STATUS BADGE -->
-          @if (!authService.isConfigured()) {
-             <div class="bg-orange-50 border border-orange-100 rounded-lg p-3 mb-6 text-center">
-                <p class="text-[10px] font-bold text-orange-800 uppercase tracking-wide mb-1">⚠️ Demo Mode Active</p>
-                <p class="text-xs text-orange-700 leading-snug">
-                   Login is simulated. To enable real Google Auth, update keys in <code>src/services/auth.service.ts</code>.
-                </p>
-             </div>
-          }
 
           <!-- REAL GOOGLE AUTH -->
           <button (click)="loginWithGoogle()" [disabled]="isLoading()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 text-[#0F172A] font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-3 transition-all mb-4 group relative overflow-hidden disabled:opacity-70 disabled:cursor-not-allowed h-12">
@@ -72,7 +63,7 @@ import { AuthService } from '../services/auth.service';
                <button 
                   (click)="loginWithEmail()" 
                   [disabled]="isLoading() || !email"
-                  class="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                  class="w-full bg-[#0F172A] hover:bg-[#1E293B] text-white font-bold py-2.5 px-4 rounded-lg transition-all flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
                >
                  @if (isLoading() && email) {
                     <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -80,8 +71,7 @@ import { AuthService } from '../services/auth.service';
                       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                  } @else {
-                   <span>Send Magic Link</span>
-                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                   <span>Continue with Email</span>
                  }
                </button>
                
@@ -97,27 +87,11 @@ import { AuthService } from '../services/auth.service';
                 </div>
                 <h3 class="font-bold text-green-900 text-sm mb-1">Check your inbox</h3>
                 <p class="text-xs text-green-800 leading-relaxed mb-3">
-                   Link sent to <b>{{ email }}</b>
+                   A sign-in link has been sent to <b>{{ email }}</b>
                 </p>
                 <button (click)="emailSent.set(false)" class="text-xs font-bold text-green-700 hover:underline">Try different email</button>
             </div>
           }
-
-          <p class="mt-6 text-[10px] text-slate-400 leading-relaxed text-center">
-            By continuing you agree to our Terms and Privacy Policy.
-          </p>
-
-          <!-- PHASE 3 HELPER -->
-          <div class="mt-4 pt-4 border-t border-slate-100">
-             <div class="bg-slate-50 border border-slate-200 rounded p-2 text-center">
-                <p class="text-[10px] uppercase font-bold text-slate-400 mb-1">Phase 3 Configuration</p>
-                <p class="text-[10px] text-slate-500 mb-1">Whitelist this URL in Supabase:</p>
-                <code class="block bg-white border border-slate-200 rounded px-1 py-1 text-[10px] text-blue-600 break-all select-all cursor-pointer font-mono" title="Click to copy" (click)="copyUrl()">
-                   {{ currentUrl }}
-                </code>
-             </div>
-          </div>
-
         </div>
       </div>
     </div>

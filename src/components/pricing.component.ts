@@ -1,5 +1,5 @@
 
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModalService } from '../services/modal.service';
 
@@ -16,129 +16,84 @@ import { ModalService } from '../services/modal.service';
       <div class="max-w-7xl mx-auto">
         
         <div class="text-center max-w-3xl mx-auto mb-16 reveal">
-           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-[#0065FF] text-xs font-semibold uppercase tracking-wide mb-6">
-             <span class="w-2 h-2 rounded-full bg-[#0065FF] animate-pulse"></span>
-             Limited Time Offer
-           </div>
            <h2 class="text-4xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight mb-6 leading-tight">
-             Plans that 
-             <span class="inline-block bg-[#E8F0FE] text-[#1967D2] px-4 py-1 rounded-full">pay for themselves.</span>
+             One plan. Everything you need.
            </h2>
-           <p class="text-slate-500 text-lg md:text-xl leading-relaxed">Stop wasting hours on content. Start treating your LinkedIn like a business.</p>
+           <p class="text-slate-500 text-lg md:text-xl leading-relaxed">
+              Simple pricing, powerful results. Start your 7-day free trial and get access to all features instantly.
+           </p>
         </div>
 
-        <!-- Toggle Switch -->
-        <div class="flex justify-center mb-16 reveal">
-           <div class="bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-sm inline-flex relative">
-              <div class="absolute inset-1 bg-[#0065FF] rounded-md transition-all duration-300 shadow-sm w-[100px]" 
-                   [class.translate-x-0]="billingCycle() === 'monthly'"
-                   [class.translate-x-[108px]]="billingCycle() === 'yearly'"></div>
-              
-              <button (click)="billingCycle.set('monthly')" class="relative z-10 w-[100px] py-2 text-sm font-semibold rounded-md transition-colors duration-300"
-                      [class.text-white]="billingCycle() === 'monthly'"
-                      [class.text-slate-500]="billingCycle() === 'yearly'">
-                 Monthly
-              </button>
-              <button (click)="billingCycle.set('yearly')" class="relative z-10 w-[108px] py-2 text-sm font-semibold rounded-md transition-colors duration-300 flex items-center justify-center gap-1"
-                      [class.text-white]="billingCycle() === 'yearly'"
-                      [class.text-slate-500]="billingCycle() === 'monthly'">
-                 Yearly
-                 <span class="text-[10px] bg-green-500 text-white px-1.5 py-0.5 rounded-full font-bold ml-1">-20%</span>
-              </button>
-           </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center max-w-4xl mx-auto">
+        <div class="flex justify-center">
            
-           <!-- STARTER ($15) -->
-           <div class="bg-white rounded-[32px] p-8 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 group reveal">
+           <!-- SINGLE PRICING CARD -->
+           <div class="bg-white rounded-[32px] p-8 border-2 border-[#0065FF] shadow-2xl shadow-blue-500/10 relative reveal z-10 w-full max-w-md flex flex-col transition-transform duration-300 hover:scale-[1.02]">
+              
               <div class="flex justify-between items-center mb-4">
-                 <h3 class="text-xl font-bold text-[#0F172A]">Starter</h3>
+                 <h3 class="text-xl font-bold text-[#0F172A]">Pro Plan</h3>
+                 <span class="text-xs font-bold bg-blue-50 text-[#0065FF] px-3 py-1 rounded-full border border-blue-100">All Inclusive</span>
               </div>
-              <p class="text-slate-500 text-sm mb-6 h-10">Perfect for individuals just getting started with personal branding.</p>
+              <p class="text-slate-500 text-sm mb-6 h-10">Everything you need to grow a massive audience and generate leads.</p>
               
               <div class="mb-8">
-                 <span class="text-4xl font-extrabold text-[#0F172A]">
-                    {{ billingCycle() === 'monthly' ? '$15' : '$12' }}
-                 </span>
+                 <span class="text-5xl font-extrabold text-[#0F172A]">$20</span>
                  <span class="text-slate-400 font-medium">/mo</span>
-                 @if (billingCycle() === 'yearly') {
-                   <div class="text-xs text-green-600 font-medium mt-1">Billed $144 yearly</div>
-                 }
               </div>
               
-              <button (click)="modalService.open()" class="w-full py-4 border border-slate-200 rounded-lg font-bold text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all mb-8">
-                Get Started
+              <button (click)="modalService.open()" class="w-full py-3 bg-[#0065FF] rounded-lg font-bold text-white hover:bg-[#0052CC] hover:scale-[1.02] transition-all mb-8 shadow-lg shadow-blue-500/20">
+                Start 7-Day Free Trial
               </button>
               
-              <div class="space-y-4">
-                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Features</p>
+              <div class="space-y-4 mt-auto">
+                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Includes all features:</p>
                  <ul class="space-y-3">
-                    <li class="flex items-start gap-3 text-sm text-slate-600">
-                       <svg class="w-5 h-5 text-[#0065FF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                       <span>15 AI-Generated Posts/mo</span>
+                    <li class="flex items-start gap-3 text-sm text-slate-800 font-medium">
+                       <svg class="w-5 h-5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                       <span>Unlimited AI Writing</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-600">
-                       <svg class="w-5 h-5 text-[#0065FF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                       <span>Basic Scheduling</span>
+                    <li class="flex items-start gap-3 text-sm text-slate-800 font-medium">
+                       <svg class="w-5 h-5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                       <span>Smart Scheduling</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-600">
-                       <svg class="w-5 h-5 text-[#0065FF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                       <span>Profile Analytics (30 days)</span>
+                    <li class="flex items-start gap-3 text-sm text-slate-800 font-medium">
+                       <svg class="w-5 h-5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                       <span>Deep Profile Analytics</span>
                     </li>
-                 </ul>
-              </div>
-           </div>
-
-           <!-- PRO ($30) -->
-           <div class="bg-black rounded-[32px] p-8 border border-slate-800 shadow-2xl relative reveal scale-105 z-10 overflow-hidden group">
-              
-              <!-- Gradient Glow -->
-              <div class="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-[80px] -z-10 pointer-events-none group-hover:bg-blue-600/30 transition-colors"></div>
-
-              <div class="flex justify-between items-center mb-4">
-                 <h3 class="text-xl font-bold text-white">Pro</h3>
-                 <span class="text-xs font-bold bg-[#0065FF] text-white px-3 py-1 rounded-full shadow-lg shadow-blue-900/50">Most Popular</span>
-              </div>
-              <p class="text-slate-400 text-sm mb-6 h-10">Everything you need to grow a massive audience and generate leads.</p>
-              
-              <div class="mb-8">
-                 <span class="text-5xl font-extrabold text-white">
-                   {{ billingCycle() === 'monthly' ? '$30' : '$24' }}
-                 </span>
-                 <span class="text-slate-400 font-medium">/mo</span>
-                 @if (billingCycle() === 'yearly') {
-                   <div class="text-xs text-green-400 font-medium mt-1">Billed $288 yearly</div>
-                 }
-              </div>
-              
-              <button (click)="modalService.open()" class="w-full py-4 bg-[#0065FF] rounded-lg font-bold text-white hover:bg-[#0052CC] hover:scale-[1.02] transition-all mb-8 shadow-lg shadow-blue-900/20">
-                Get Started
-              </button>
-              
-              <div class="space-y-4">
-                 <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Everything in Starter, plus:</p>
-                 <ul class="space-y-3">
-                    <li class="flex items-start gap-3 text-sm text-slate-300">
-                       <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                       <span class="font-medium text-white">Unlimited AI Writing</span>
+                    <li class="flex items-start gap-3 text-sm text-slate-800 font-medium">
+                       <svg class="w-5 h-5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                       <span>Advanced Carousel Maker</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-300">
-                       <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                       <span class="font-medium text-white">Advanced Carousel Maker</span>
-                    </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-300">
-                       <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <li class="flex items-start gap-3 text-sm text-slate-800 font-medium">
+                       <svg class="w-5 h-5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                        <span>Viral Post Database</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm text-slate-300">
-                       <svg class="w-5 h-5 text-blue-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                       <span>Lead CRM Integration</span>
+                    <li class="flex items-start gap-3 text-sm text-slate-800 font-medium">
+                       <svg class="w-5 h-5 text-green-500 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                       <span>Priority Support</span>
                     </li>
                  </ul>
               </div>
            </div>
 
+        </div>
+
+        <!-- FAQ Section -->
+        <div class="mt-24 max-w-4xl mx-auto reveal">
+          <h3 class="text-2xl font-bold text-center text-[#0F172A] mb-8">Frequently Asked Questions</h3>
+          <div class="space-y-4">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="font-bold text-slate-800 mb-2">Can I cancel anytime?</h4>
+              <p class="text-sm text-slate-500 leading-relaxed">Yes, you can cancel your subscription at any time from your account settings. Your plan will remain active until the end of the current billing period, with no extra charges.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="font-bold text-slate-800 mb-2">What happens after my 7-day free trial?</h4>
+              <p class="text-sm text-slate-500 leading-relaxed">We will notify you before your trial ends. You can then decide to upgrade to a paid plan to keep your Pro features, or your account will automatically be downgraded to our free plan.</p>
+            </div>
+             <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+              <h4 class="font-bold text-slate-800 mb-2">Do you offer refunds?</h4>
+              <p class="text-sm text-slate-500 leading-relaxed">Due to the nature of our service, we do not offer refunds. However, you can cancel your subscription at any time to avoid future charges.</p>
+            </div>
+          </div>
         </div>
         
       </div>
@@ -147,5 +102,4 @@ import { ModalService } from '../services/modal.service';
 })
 export class PricingComponent {
   modalService = inject(ModalService);
-  billingCycle = signal<'monthly' | 'yearly'>('monthly');
 }

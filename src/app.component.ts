@@ -9,8 +9,10 @@ import { LoginModalComponent } from './components/login-modal.component';
 import { DashboardComponent } from './components/dashboard.component';
 import { PricingComponent } from './components/pricing.component';
 import { ShowcaseComponent } from './components/showcase.component';
+import { DemoPageComponent } from './components/demo-page.component';
 import { ModalService } from './services/modal.service';
 import { AuthService } from './services/auth.service';
+import { NavigationService } from './services/navigation.service';
 
 @Component({
   selector: 'app-root',
@@ -24,11 +26,13 @@ import { AuthService } from './services/auth.service';
     LoginModalComponent,
     DashboardComponent,
     PricingComponent,
-    ShowcaseComponent
+    ShowcaseComponent,
+    DemoPageComponent
   ],
   templateUrl: './app.component.html',
 })
 export class AppComponent {
   modalService = inject(ModalService);
   authService = inject(AuthService);
+  navigationService = inject(NavigationService);
 }

@@ -1,4 +1,3 @@
-
 import { Component, inject, signal, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -219,7 +218,7 @@ declare var html2canvas: any;
                         (click)="activeSlideIndex.set($index); activeTab.set('content')"
                    >
                       <!-- Download Button -->
-                       <div class="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <div class="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity ignore-on-download">
                          <button (click)="downloadSlide($index); $event.stopPropagation()" class="bg-white text-slate-800 p-2 rounded-full shadow-lg border border-slate-100 hover:scale-110 transition-transform">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                          </button>
@@ -243,8 +242,7 @@ declare var html2canvas: any;
                           </div>
 
                           <!-- Footer -->
-                          <div class="pt-8 flex justify-between items-center opacity-50 border-t border-current/10 mt-auto">
-                             <div class="font-bold text-xs">postrocket.ai</div>
+                          <div class="pt-8 flex justify-end items-center opacity-50 border-t border-current/10 mt-auto">
                              <div class="text-xs font-bold">{{ $index + 1 }} / {{ slides().length }}</div>
                           </div>
                       </div>
@@ -340,7 +338,8 @@ export class CarouselMakerComponent {
         const canvas = await html2canvas(element, { 
             scale: 2,
             useCORS: true, 
-            allowTaint: true 
+            allowTaint: true,
+            ignoreElements: (el: Element) => el.classList.contains('ignore-on-download')
         });
         
         const link = document.createElement('a');

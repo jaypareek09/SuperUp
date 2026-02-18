@@ -9,10 +9,11 @@ import { ScheduleComponent } from './dashboard/schedule.component';
 import { MyPostsComponent } from './dashboard/my-posts.component';
 import { CarouselMakerComponent } from './dashboard/carousel-maker.component';
 import { ViralPostsComponent } from './dashboard/viral-posts.component';
-import { EngagementComponent } from './dashboard/engagement.component';
 import { OnboardingModalComponent } from './dashboard/onboarding-modal.component';
 import { SettingsComponent } from './dashboard/settings.component';
 import { AnalyticsComponent } from './dashboard/analytics.component';
+import { NewPostModalComponent } from './dashboard/new-post-modal.component';
+import { LogoComponent } from './logo.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,10 +26,11 @@ import { AnalyticsComponent } from './dashboard/analytics.component';
     MyPostsComponent, 
     CarouselMakerComponent,
     ViralPostsComponent,
-    EngagementComponent,
     OnboardingModalComponent,
     SettingsComponent,
-    AnalyticsComponent
+    AnalyticsComponent,
+    NewPostModalComponent,
+    LogoComponent
   ],
   template: `
     <div class="flex h-screen bg-white font-sans text-slate-900 selection:bg-blue-100 selection:text-blue-900 overflow-hidden">
@@ -36,6 +38,11 @@ import { AnalyticsComponent } from './dashboard/analytics.component';
       <!-- ONBOARDING MODAL -->
       @if (store.onboardingStep() !== 'IDLE' && store.onboardingStep() !== 'COMPLETE') {
          <app-onboarding-modal />
+      }
+
+      <!-- NEW POST MODAL -->
+      @if (store.isNewPostModalOpen()) {
+         <app-new-post-modal />
       }
 
       <!-- NOTIFICATIONS -->
@@ -51,7 +58,7 @@ import { AnalyticsComponent } from './dashboard/analytics.component';
         
         <!-- Brand -->
         <div class="h-14 flex items-center px-4 mb-2 gap-3">
-           <img src="https://raw.githubusercontent.com/jaypareek09/jay/f8f0e8a4249db057b6d86eb42a6139b6abaa8287/POSTROCKET%20-%20LOGO.png" alt="PostRocket" class="h-10 w-auto cursor-pointer" (click)="store.navigateTo('HOME')">
+           <app-logo class="cursor-pointer" (click)="store.navigateTo('HOME')" />
            <span class="font-bold text-xl tracking-tight text-slate-900 cursor-pointer" (click)="store.navigateTo('HOME')">PostRocket</span>
         </div>
 
@@ -102,9 +109,9 @@ import { AnalyticsComponent } from './dashboard/analytics.component';
            }
         </div>
 
-        <!-- Primary Action -->
+        <!-- Primary Action (New Post) -->
         <div class="mb-6">
-           <button (click)="store.navigateTo('WRITE')" class="bg-white hover:bg-slate-50 border border-slate-200 text-[#444746] text-sm font-medium py-3.5 px-6 rounded-2xl flex items-center gap-3 transition-all shadow-sm hover:shadow-md w-fit">
+           <button (click)="store.openNewPostModal()" class="bg-white hover:bg-slate-50 border border-slate-200 text-[#444746] text-sm font-medium py-3.5 px-6 rounded-2xl flex items-center gap-3 transition-all shadow-sm hover:shadow-md w-fit">
              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
              <span class="font-medium">New Post</span>
            </button>
@@ -137,11 +144,6 @@ import { AnalyticsComponent } from './dashboard/analytics.component';
           <button (click)="store.navigateTo('CAROUSEL')" [class]="navClass('CAROUSEL')">
              <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
              Carousel Maker
-          </button>
-          
-          <button (click)="store.navigateTo('ENGAGEMENT')" [class]="navClass('ENGAGEMENT')">
-             <svg class="w-5 h-5 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
-             Engagement
           </button>
 
           <button (click)="store.navigateTo('VIRAL')" [class]="navClass('VIRAL')">
@@ -178,7 +180,7 @@ import { AnalyticsComponent } from './dashboard/analytics.component';
             @if (store.isLoadingView()) {
                 <div class="absolute inset-0 z-50 bg-white/80 backdrop-blur-md flex flex-col items-center justify-center animate-fade-in transition-all duration-300">
                    <!-- Just the spinning logo, no text -->
-                   <img src="https://raw.githubusercontent.com/jaypareek09/jay/f8f0e8a4249db057b6d86eb42a6139b6abaa8287/POSTROCKET%20-%20LOGO.png" class="h-16 w-auto animate-spin-slow">
+                   <app-logo logoClass="h-16 w-auto animate-spin-slow" />
                 </div>
             }
 
@@ -191,7 +193,6 @@ import { AnalyticsComponent } from './dashboard/analytics.component';
                         @case ('MY_POSTS') { <app-my-posts /> }
                         @case ('CAROUSEL') { <app-carousel-maker /> }
                         @case ('VIRAL') { <app-viral-posts /> }
-                        @case ('ENGAGEMENT') { <app-engagement /> }
                         @case ('SETTINGS') { <app-settings /> }
                         @case ('ANALYTICS') { <app-analytics /> }
                         @default { <app-dashboard-home /> }
